@@ -15,18 +15,7 @@
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
     <style>
-        :root {
-            --primary: #00D084;
-            --primary-dark: #00A86B;
-            --secondary: #2C3E50;
-            --bg-body: #F0F2F5;
-            --surface: #FFFFFF;
-            --text-main: #111827;
-            --text-muted: #6B7280;
-            --danger: #EF4444;
-            --success: #10B981;
-        }
-
+        :root { --primary: #00D084; --primary-dark: #00A86B; --secondary: #2C3E50; --bg-body: #F0F2F5; --surface: #FFFFFF; --text-main: #111827; --text-muted: #6B7280; --danger: #EF4444; --success: #10B981; }
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); margin: 0; padding: 15px; color: var(--text-main); -webkit-font-smoothing: antialiased; }
         .container { max-width: 600px; margin: 0 auto; padding-bottom: 60px; }
 
@@ -44,74 +33,20 @@
         .progress-track { width: 100%; height: 8px; background: #E5E7EB; border-radius: 10px; overflow: hidden; }
         .progress-fill { height: 100%; background: var(--primary); transition: width 0.5s ease; }
 
-        /* --- NOVO LAYOUT DO ANDAR (ESTILO CORREDOR) --- */
+        /* LAYOUT CORREDOR */
         .building-card { display: flex; flex-direction: column; gap: 15px; }
-        
-        .floor-card { 
-            background: var(--surface); 
-            border-radius: 12px; 
-            padding: 15px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
-            position: relative;
-        }
-
-        .floor-badge {
-            position: absolute;
-            top: 10px; left: 10px;
-            background: var(--secondary); color: white;
-            font-size: 0.7rem; font-weight: 700;
-            padding: 4px 8px; border-radius: 6px;
-        }
-
-        /* O Layout Mágico: Linha Cima, Hall, Linha Baixo */
-        .floor-layout {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            margin-top: 20px; /* Espaço para o badge do andar */
-        }
-
-        .row-units {
-            display: flex;
-            gap: 8px;
-            justify-content: center;
-            width: 100%;
-        }
-
-        .row-hall {
-            display: flex;
-            justify-content: center;
-            width: 100%;
-            margin: 4px 0;
-        }
+        .floor-card { background: var(--surface); border-radius: 12px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.03); position: relative; }
+        .floor-badge { position: absolute; top: 10px; left: 10px; background: var(--secondary); color: white; font-size: 0.7rem; font-weight: 700; padding: 4px 8px; border-radius: 6px; }
+        .floor-layout { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 20px; }
+        .row-units { display: flex; gap: 8px; justify-content: center; width: 100%; }
+        .row-hall { display: flex; justify-content: center; width: 100%; margin: 4px 0; }
 
         /* QUADRADINHOS */
-        .unit {
-            width: 100%; /* Estica para preencher espaço */
-            max-width: 50px;
-            height: 45px; 
-            border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.75rem; font-weight: 700; cursor: pointer;
-            background: #F3F4F6; color: #9CA3AF; 
-            transition: transform 0.1s;
-        }
+        .unit { width: 100%; max-width: 50px; height: 45px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; cursor: pointer; background: #F3F4F6; color: #9CA3AF; transition: transform 0.1s; user-select: none; }
         .unit:active { transform: scale(0.9); }
-        
-        .unit.hall-btn {
-            width: 120px; /* Hall Largo */
-            max-width: none;
-            height: 30px;
-            background: transparent;
-            border: 2px dashed #D1D5DB;
-            color: var(--text-muted);
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+        .unit.hall-btn { width: 120px; max-width: none; height: 30px; background: transparent; border: 2px dashed #D1D5DB; color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* Cores de Status */
+        /* Status Cores */
         .unit.ok { background: var(--success); color: white; border: none; }
         .unit.pendente { background: var(--danger); color: white; border: none; animation: pulse 2s infinite; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
@@ -120,12 +55,10 @@
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 99; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
         .modal { background: white; width: 85%; max-width: 400px; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: popIn 0.3s; }
         @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        
         .btn-group { display: flex; gap: 10px; margin: 20px 0; }
         .btn-opt { flex: 1; padding: 12px; border-radius: 10px; border: 2px solid #eee; background: white; font-weight: 600; cursor: pointer; text-align: center; }
         .btn-opt.sel-ok { background: var(--success); color: white; border-color: var(--success); }
         .btn-opt.sel-err { background: var(--danger); color: white; border-color: var(--danger); }
-        
         textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 10px; height: 80px; font-family: inherit; margin-bottom: 15px; box-sizing: border-box;}
         .btn-save { width: 100%; padding: 15px; background: var(--secondary); color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; }
         
@@ -140,12 +73,10 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // --- CONEXÃO SUPABASE ---
         const SUPABASE_URL = 'https://iisvzfzcpxxgkasmteft.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpc3Z6ZnpjcHh4Z2thc210ZWZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNzcyOTgsImV4cCI6MjA3OTk1MzI5OH0.HxkLQxXb8yohwP9nK6IfxGzxH1ItlMwmXpHVZb6qlGo';
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // --- DADOS ---
         const TORRES = ["Torre 5", "Torre 2", "Torre 3", "Torre 4"];
         const FASES = ["POS FORMA", "ESQUADRIAS", "IMPERMEABILIZAÇÃO", "ALVENARIA BLOCO", "FECHAMENTO SHAFT"];
         const ANDARES = 8;
@@ -154,36 +85,73 @@
             const [torre, setTorre] = useState(TORRES[0]);
             const [fase, setFase] = useState(FASES[0]);
             const [dados, setDados] = useState({});
-            const [loading, setLoading] = useState(false);
             const [modalOpen, setModalOpen] = useState(false);
             const [itemEditando, setItemEditando] = useState(null);
             const [toast, setToast] = useState(null);
 
+            // Carrega dados e garante que o objeto de dados está limpo
             useEffect(() => {
                 async function load() {
-                    setLoading(true);
-                    const { data } = await supabase.from('vistorias').select('*').eq('torre', torre).eq('fase', fase);
+                    // Limpa dados antigos visualmente antes de carregar novos
+                    setDados({});
+                    
+                    const { data } = await supabase
+                        .from('vistorias')
+                        .select('*')
+                        .eq('torre', torre)
+                        .eq('fase', fase);
+                        
                     const map = {};
-                    if(data) data.forEach(i => map[i.unidade] = i);
+                    if(data) {
+                        data.forEach(i => {
+                            map[i.unidade] = i;
+                        });
+                    }
                     setDados(map);
-                    setLoading(false);
                 }
                 load();
             }, [torre, fase]);
 
             const save = async (status, obs) => {
-                const id = itemEditando.id.toString();
-                const key = `${torre}_${fase}_${id}`;
-                setDados(p => ({...p, [id]: {status, obs}}));
+                const idUnidade = itemEditando.id.toString();
+                // Gera um ID consistente sem espaços extras
+                const idUnico = `${torre}_${fase}_${idUnidade}`.trim();
+
+                // Atualiza visualmente IMEDIATAMENTE (pra ficar rápido)
+                setDados(prev => ({
+                    ...prev, 
+                    [idUnidade]: { ...prev[idUnidade], status: status, obs: obs }
+                }));
+
                 setModalOpen(false);
-                setToast("Salvo com sucesso!");
+                setToast("Atualizado!");
                 setTimeout(()=>setToast(null), 2500);
-                await supabase.from('vistorias').upsert({id: key, torre, fase, unidade: id, status, obs: status==='pendente'?obs:''});
+
+                // Envia para o banco com instrução explicita de conflito no ID
+                const { error } = await supabase
+                    .from('vistorias')
+                    .upsert({
+                        id: idUnico,
+                        torre: torre,
+                        fase: fase,
+                        unidade: idUnidade,
+                        status: status,
+                        obs: status === 'pendente' ? obs : '',
+                        updated_at: new Date()
+                    }, { onConflict: 'id' }); // <--- Garante que substitui se o ID já existir
+
+                if (error) {
+                    console.error("Erro Supabase:", error);
+                    setToast("Erro ao salvar online!");
+                }
             };
 
             const getItem = (id) => dados[id] || {status: null, obs: ''};
-
-            const progresso = Math.round((Object.values(dados).filter(d=>d.status==='ok').length / (ANDARES*9)) * 100) || 0;
+            
+            // Cálculo seguro do progresso
+            const totalUnits = ANDARES * 9; // 8 APs + 1 Hall
+            const doneCount = Object.values(dados).filter(d => d.status === 'ok').length;
+            const progresso = Math.round((doneCount / totalUnits) * 100) || 0;
 
             return (
                 <div className="container">
@@ -207,29 +175,22 @@
                     <div className="building-card">
                         {Array.from({length: ANDARES}, (_, i) => {
                             const andar = ANDARES - i;
-                            // Aqui definimos o layout do corredor
-                            const ladoA = [1, 2, 3, 4]; // Cima
-                            const ladoB = [5, 6, 7, 8]; // Baixo
+                            const ladoA = [1, 2, 3, 4];
+                            const ladoB = [5, 6, 7, 8];
                             
                             return (
                                 <div key={andar} className="floor-card">
                                     <div className="floor-badge">{andar}º PAV</div>
-                                    
                                     <div className="floor-layout">
-                                        {/* LINHA DE CIMA (101 a 104) */}
                                         <div className="row-units">
                                             {ladoA.map(num => {
                                                 const ap = (andar * 100) + num;
                                                 return <Unit key={ap} id={ap} data={getItem(ap)} onClick={()=> {setItemEditando({id: ap, ...getItem(ap)}); setModalOpen(true)}} />
                                             })}
                                         </div>
-
-                                        {/* HALL NO MEIO */}
                                         <div className="row-hall">
                                             <Unit id={`HALL-${andar}`} label="HALL" isHall={true} data={getItem(`HALL-${andar}`)} onClick={()=> {setItemEditando({id: `HALL-${andar}`, ...getItem(`HALL-${andar}`)}); setModalOpen(true)}} />
                                         </div>
-
-                                        {/* LINHA DE BAIXO (105 a 108) */}
                                         <div className="row-units">
                                             {ladoB.map(num => {
                                                 const ap = (andar * 100) + num;
@@ -252,7 +213,6 @@
             if(data.status === 'ok') cls += ' ok';
             if(data.status === 'pendente') cls += ' pendente';
             
-            // Ícone apenas se não for Hall (Hall fica escrito HALL)
             let content = label || id;
             if(!isHall && data.status === 'ok') content = <i className="ph-bold ph-check"></i>;
             if(!isHall && data.status === 'pendente') content = <i className="ph-bold ph-warning"></i>;
@@ -262,7 +222,7 @@
 
         function Modal({ item, onClose, onSave }) {
             const [s, setS] = useState(item.status);
-            const [o, setO] = useState(item.obs);
+            const [o, setO] = useState(item.obs || "");
             return (
                 <div className="modal-overlay" onClick={onClose}>
                     <div className="modal" onClick={e=>e.stopPropagation()}>
