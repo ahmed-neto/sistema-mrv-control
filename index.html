@@ -119,3 +119,167 @@
         /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 99; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
         .modal { background: white; width: 85%; max-width: 400px; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: popIn 0.3s; }
+        @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        .btn-group { display: flex; gap: 10px; margin: 20px 0; }
+        .btn-opt { flex: 1; padding: 12px; border-radius: 10px; border: 2px solid #eee; background: white; font-weight: 600; cursor: pointer; text-align: center; }
+        .btn-opt.sel-ok { background: var(--success); color: white; border-color: var(--success); }
+        .btn-opt.sel-err { background: var(--danger); color: white; border-color: var(--danger); }
+        
+        textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 10px; height: 80px; font-family: inherit; margin-bottom: 15px; box-sizing: border-box;}
+        .btn-save { width: 100%; padding: 15px; background: var(--secondary); color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; }
+        
+        /* TOAST */
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #222; color: white; padding: 10px 20px; border-radius: 30px; font-size: 0.8rem; font-weight: 600; z-index: 200; display: flex; align-items: center; gap: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+    </style>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- CONEXÃO SUPABASE ---
+        const SUPABASE_URL = 'https://iisvzfzcpxxgkasmteft.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpc3Z6ZnpjcHh4Z2thc210ZWZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNzcyOTgsImV4cCI6MjA3OTk1MzI5OH0.HxkLQxXb8yohwP9nK6IfxGzxH1ItlMwmXpHVZb6qlGo';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // --- DADOS ---
+        const TORRES = ["Torre 5", "Torre 2", "Torre 3", "Torre 4"];
+        const FASES = ["POS FORMA", "ESQUADRIAS", "IMPERMEABILIZAÇÃO", "ALVENARIA BLOCO", "FECHAMENTO SHAFT"];
+        const ANDARES = 8;
+
+        function App() {
+            const [torre, setTorre] = useState(TORRES[0]);
+            const [fase, setFase] = useState(FASES[0]);
+            const [dados, setDados] = useState({});
+            const [loading, setLoading] = useState(false);
+            const [modalOpen, setModalOpen] = useState(false);
+            const [itemEditando, setItemEditando] = useState(null);
+            const [toast, setToast] = useState(null);
+
+            useEffect(() => {
+                async function load() {
+                    setLoading(true);
+                    const { data } = await supabase.from('vistorias').select('*').eq('torre', torre).eq('fase', fase);
+                    const map = {};
+                    if(data) data.forEach(i => map[i.unidade] = i);
+                    setDados(map);
+                    setLoading(false);
+                }
+                load();
+            }, [torre, fase]);
+
+            const save = async (status, obs) => {
+                const id = itemEditando.id.toString();
+                const key = `${torre}_${fase}_${id}`;
+                setDados(p => ({...p, [id]: {status, obs}}));
+                setModalOpen(false);
+                setToast("Salvo com sucesso!");
+                setTimeout(()=>setToast(null), 2500);
+                await supabase.from('vistorias').upsert({id: key, torre, fase, unidade: id, status, obs: status==='pendente'?obs:''});
+            };
+
+            const getItem = (id) => dados[id] || {status: null, obs: ''};
+
+            const progresso = Math.round((Object.values(dados).filter(d=>d.status==='ok').length / (ANDARES*9)) * 100) || 0;
+
+            return (
+                <div className="container">
+                    {toast && <div className="toast"><i className="ph-fill ph-check-circle"></i> {toast}</div>}
+
+                    <div className="dashboard-header">
+                        <h1 className="app-title">MRV Gestão</h1>
+                        <div className="control-grid">
+                            <select value={torre} onChange={e=>setTorre(e.target.value)}>{TORRES.map(t=><option key={t}>{t}</option>)}</select>
+                            <select value={fase} onChange={e=>setFase(e.target.value)}>{FASES.map(f=><option key={f}>{f}</option>)}</select>
+                        </div>
+                        <div className="progress-container">
+                            <div className="progress-header">
+                                <span style={{fontSize:'0.75rem', fontWeight:'700', color:'#666'}}>CONCLUSÃO</span>
+                                <span style={{fontSize:'1.2rem', fontWeight:'800', color:'var(--primary)'}}>{progresso}%</span>
+                            </div>
+                            <div className="progress-track"><div className="progress-fill" style={{width:`${progresso}%`}}></div></div>
+                        </div>
+                    </div>
+
+                    <div className="building-card">
+                        {Array.from({length: ANDARES}, (_, i) => {
+                            const andar = ANDARES - i;
+                            // Aqui definimos o layout do corredor
+                            const ladoA = [1, 2, 3, 4]; // Cima
+                            const ladoB = [5, 6, 7, 8]; // Baixo
+                            
+                            return (
+                                <div key={andar} className="floor-card">
+                                    <div className="floor-badge">{andar}º PAV</div>
+                                    
+                                    <div className="floor-layout">
+                                        {/* LINHA DE CIMA (101 a 104) */}
+                                        <div className="row-units">
+                                            {ladoA.map(num => {
+                                                const ap = (andar * 100) + num;
+                                                return <Unit key={ap} id={ap} data={getItem(ap)} onClick={()=> {setItemEditando({id: ap, ...getItem(ap)}); setModalOpen(true)}} />
+                                            })}
+                                        </div>
+
+                                        {/* HALL NO MEIO */}
+                                        <div className="row-hall">
+                                            <Unit id={`HALL-${andar}`} label="HALL" isHall={true} data={getItem(`HALL-${andar}`)} onClick={()=> {setItemEditando({id: `HALL-${andar}`, ...getItem(`HALL-${andar}`)}); setModalOpen(true)}} />
+                                        </div>
+
+                                        {/* LINHA DE BAIXO (105 a 108) */}
+                                        <div className="row-units">
+                                            {ladoB.map(num => {
+                                                const ap = (andar * 100) + num;
+                                                return <Unit key={ap} id={ap} data={getItem(ap)} onClick={()=> {setItemEditando({id: ap, ...getItem(ap)}); setModalOpen(true)}} />
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {modalOpen && <Modal item={itemEditando} onClose={()=>setModalOpen(false)} onSave={save} />}
+                </div>
+            );
+        }
+
+        function Unit({ id, label, isHall, data, onClick }) {
+            let cls = `unit ${isHall ? 'hall-btn' : ''}`;
+            if(data.status === 'ok') cls += ' ok';
+            if(data.status === 'pendente') cls += ' pendente';
+            
+            // Ícone apenas se não for Hall (Hall fica escrito HALL)
+            let content = label || id;
+            if(!isHall && data.status === 'ok') content = <i className="ph-bold ph-check"></i>;
+            if(!isHall && data.status === 'pendente') content = <i className="ph-bold ph-warning"></i>;
+
+            return <div className={cls} onClick={onClick}>{content}</div>;
+        }
+
+        function Modal({ item, onClose, onSave }) {
+            const [s, setS] = useState(item.status);
+            const [o, setO] = useState(item.obs);
+            return (
+                <div className="modal-overlay" onClick={onClose}>
+                    <div className="modal" onClick={e=>e.stopPropagation()}>
+                        <h3 style={{margin:0, color:'var(--secondary)'}}>{String(item.id).includes('HALL') ? 'Hall' : `Apto ${item.id}`}</h3>
+                        <div className="btn-group">
+                            <div className={`btn-opt ${s==='ok'?'sel-ok':''}`} onClick={()=>setS('ok')}>Aprovado</div>
+                            <div className={`btn-opt ${s==='pendente'?'sel-err':''}`} onClick={()=>setS('pendente')}>Pendente</div>
+                        </div>
+                        {s==='pendente' && <textarea autoFocus placeholder="Descreva o problema..." value={o} onChange={e=>setO(e.target.value)}></textarea>}
+                        <button className="btn-save" onClick={()=>onSave(s, o)}>Salvar</button>
+                    </div>
+                </div>
+            )
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
