@@ -2,8 +2,8 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MRV Gestão - Engenharia</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MRV Gestão - Mobile View</title>
     
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -15,371 +15,107 @@
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
     <style>
-        /* --- DESIGN SYSTEM PREMIUM --- */
         :root {
-            --primary: #00D084; /* Verde MRV */
+            --primary: #00D084;
             --primary-dark: #00A86B;
-            --secondary: #2C3E50; /* Azul Petróleo Profundo */
+            --secondary: #2C3E50;
             --bg-body: #F0F2F5;
             --surface: #FFFFFF;
             --text-main: #111827;
             --text-muted: #6B7280;
             --danger: #EF4444;
             --success: #10B981;
-            --warning: #F59E0B;
-            --radius: 12px;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
 
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); margin: 0; padding: 20px; color: var(--text-main); -webkit-font-smoothing: antialiased; }
-        
-        .container { max-width: 900px; margin: 0 auto; padding-bottom: 40px; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); margin: 0; padding: 15px; color: var(--text-main); -webkit-font-smoothing: antialiased; }
+        .container { max-width: 600px; margin: 0 auto; padding-bottom: 60px; }
 
-        /* HEADER & DASHBOARD */
-        .dashboard-header { background: var(--surface); padding: 24px; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 24px; border-left: 6px solid var(--primary); }
-        .app-title { margin: 0; font-size: 1.5rem; font-weight: 700; color: var(--secondary); letter-spacing: -0.5px; }
-        .app-subtitle { color: var(--text-muted); font-size: 0.875rem; font-weight: 500; margin-top: 4px; display: block; }
-
-        /* CONTROLS (Selects) */
-        .control-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; margin-top: 20px; }
-        @media (max-width: 600px) { .control-grid { grid-template-columns: 1fr; } }
+        /* HEADER */
+        .dashboard-header { background: var(--surface); padding: 20px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; border-top: 4px solid var(--primary); }
+        .app-title { margin: 0; font-size: 1.25rem; font-weight: 700; color: var(--secondary); }
         
-        .select-wrapper { position: relative; }
-        .select-label { display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; letter-spacing: 0.5px; }
-        select {
-            width: 100%; padding: 12px 16px; border-radius: 8px; border: 1px solid #E5E7EB;
-            font-size: 0.95rem; font-family: 'Inter', sans-serif; background: #F9FAFB; color: var(--secondary);
-            appearance: none; cursor: pointer; transition: all 0.2s; font-weight: 500;
+        /* SELECTS */
+        .control-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 10px; margin-top: 15px; }
+        select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F9FAFB; font-weight: 600; color: var(--secondary); font-size: 0.9rem; }
+        
+        /* PROGRESSO */
+        .progress-container { margin-top: 15px; }
+        .progress-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 5px; }
+        .progress-track { width: 100%; height: 8px; background: #E5E7EB; border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--primary); transition: width 0.5s ease; }
+
+        /* --- NOVO LAYOUT DO ANDAR (ESTILO CORREDOR) --- */
+        .building-card { display: flex; flex-direction: column; gap: 15px; }
+        
+        .floor-card { 
+            background: var(--surface); 
+            border-radius: 12px; 
+            padding: 15px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+            position: relative;
         }
-        select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0, 208, 132, 0.15); background: white; }
-        
-        /* BARRA DE PROGRESSO */
-        .progress-container { margin-top: 24px; padding-top: 20px; border-top: 1px solid #F3F4F6; }
-        .progress-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px; }
-        .progress-label { font-size: 0.85rem; font-weight: 600; color: var(--secondary); }
-        .progress-percent { font-size: 1.5rem; font-weight: 800; color: var(--primary); }
-        .progress-track { width: 100%; height: 10px; background: #E5E7EB; border-radius: 99px; overflow: hidden; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%); transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
 
-        /* GRID DO PRÉDIO */
-        .building-card { background: var(--surface); padding: 24px; border-radius: var(--radius); box-shadow: var(--shadow); }
-        .floor-row { display: flex; align-items: center; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px dashed #E5E7EB; }
-        .floor-row:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
-        .floor-label { width: 50px; font-weight: 700; color: var(--text-muted); font-size: 0.9rem; text-align: center; }
-        
-        .units-grid { display: flex; flex-wrap: wrap; gap: 10px; flex: 1; }
-        
+        .floor-badge {
+            position: absolute;
+            top: 10px; left: 10px;
+            background: var(--secondary); color: white;
+            font-size: 0.7rem; font-weight: 700;
+            padding: 4px 8px; border-radius: 6px;
+        }
+
+        /* O Layout Mágico: Linha Cima, Hall, Linha Baixo */
+        .floor-layout {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            margin-top: 20px; /* Espaço para o badge do andar */
+        }
+
+        .row-units {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .row-hall {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin: 4px 0;
+        }
+
+        /* QUADRADINHOS */
         .unit {
-            width: 46px; height: 46px; border-radius: 8px;
+            width: 100%; /* Estica para preencher espaço */
+            max-width: 50px;
+            height: 45px; 
+            border-radius: 8px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 0.75rem; font-weight: 600; cursor: pointer; user-select: none;
-            background: #F3F4F6; color: #9CA3AF; border: 2px solid transparent;
-            transition: all 0.15s ease; position: relative;
+            font-size: 0.75rem; font-weight: 700; cursor: pointer;
+            background: #F3F4F6; color: #9CA3AF; 
+            transition: transform 0.1s;
         }
-        .unit:hover { transform: translateY(-2px); border-color: #D1D5DB; }
-        .unit:active { transform: scale(0.95); }
+        .unit:active { transform: scale(0.9); }
         
-        .unit.hall { width: 70px; border: 2px dashed #D1D5DB; background: transparent; color: var(--text-muted); }
-        .unit.hall:hover { background: #F9FAFB; }
-        
-        /* STATUS VISUAL */
-        .unit.ok { background: var(--success); color: white; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3); }
-        .unit.pendente { background: var(--danger); color: white; box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3); animation: pulse 2s infinite; }
-        
+        .unit.hall-btn {
+            width: 120px; /* Hall Largo */
+            max-width: none;
+            height: 30px;
+            background: transparent;
+            border: 2px dashed #D1D5DB;
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Cores de Status */
+        .unit.ok { background: var(--success); color: white; border: none; }
+        .unit.pendente { background: var(--danger); color: white; border: none; animation: pulse 2s infinite; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
 
         /* MODAL */
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); z-index: 100; display: flex; align-items: center; justify-content: center; animation: fadeIn 0.2s; }
-        .modal { background: var(--surface); width: 90%; max-width: 420px; padding: 28px; border-radius: 16px; box-shadow: var(--shadow-lg); animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-        
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-        .modal-title { font-size: 1.25rem; font-weight: 700; margin: 0; color: var(--secondary); }
-        .close-btn { background: none; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; padding: 0; }
-
-        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-        .btn-option {
-            padding: 14px; border: 2px solid #E5E7EB; border-radius: 10px; background: white;
-            font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--text-main); transition: 0.2s;
-        }
-        .btn-option.selected-ok { background: var(--success); border-color: var(--success); color: white; }
-        .btn-option.selected-error { background: var(--danger); border-color: var(--danger); color: white; }
-        
-        textarea { width: 100%; height: 100px; padding: 12px; border: 1px solid #D1D5DB; border-radius: 8px; font-family: 'Inter', sans-serif; resize: none; margin-bottom: 20px; }
-        textarea:focus { outline: none; border-color: var(--primary); }
-
-        .btn-save { width: 100%; padding: 16px; background: var(--secondary); color: white; border: none; border-radius: 10px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; }
-        .btn-save:hover { background: #1a252f; transform: translateY(-1px); }
-
-        /* TOAST NOTIFICATION */
-        .toast {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            background: var(--secondary); color: white; padding: 12px 24px; border-radius: 50px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-weight: 600; font-size: 0.9rem;
-            display: flex; align-items: center; gap: 8px; z-index: 200;
-            animation: slideDownFade 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        @keyframes slideDownFade { from { transform: translate(-50%, -20px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
-    </style>
-</head>
-<body>
-
-    <div id="root"></div>
-
-    <script type="text/babel">
-        const { useState, useEffect } = React;
-
-        // --- CONEXÃO COM SEU SUPABASE ---
-        const SUPABASE_URL = 'https://iisvzfzcpxxgkasmteft.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpc3Z6ZnpjcHh4Z2thc210ZWZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNzcyOTgsImV4cCI6MjA3OTk1MzI5OH0.HxkLQxXb8yohwP9nK6IfxGzxH1ItlMwmXpHVZb6qlGo';
-
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        // --- CONFIGURAÇÃO RESTRITA ---
-        const TORRES = ["Torre 5", "Torre 2", "Torre 3", "Torre 4"];
-        const FASES = [
-            "POS FORMA",
-            "ESQUADRIAS",
-            "IMPERMEABILIZAÇÃO",
-            "ALVENARIA BLOCO",
-            "FECHAMENTO SHAFT"
-        ];
-        
-        const ANDARES = 8;
-        const AP_POR_ANDAR = 8;
-
-        function App() {
-            const [torre, setTorre] = useState(TORRES[0]);
-            const [fase, setFase] = useState(FASES[0]);
-            const [dados, setDados] = useState({});
-            const [loading, setLoading] = useState(false);
-            const [modalOpen, setModalOpen] = useState(false);
-            const [itemEditando, setItemEditando] = useState(null);
-            const [toast, setToast] = useState(null); // Estado para notificação
-
-            // Carregar Dados
-            useEffect(() => {
-                async function carregarDados() {
-                    setLoading(true);
-                    const { data, error } = await supabase
-                        .from('vistorias')
-                        .select('*')
-                        .eq('torre', torre)
-                        .eq('fase', fase);
-
-                    const mapa = {};
-                    if (data) {
-                        data.forEach(item => {
-                            mapa[item.unidade] = { status: item.status, obs: item.obs };
-                        });
-                    }
-                    setDados(mapa);
-                    setLoading(false);
-                }
-                carregarDados();
-            }, [torre, fase]);
-
-            // Mostrar Notificação
-            const showToast = (message) => {
-                setToast(message);
-                setTimeout(() => setToast(null), 3000);
-            };
-
-            // Salvar
-            const handleSaveModal = async (status, obs) => {
-                const idUnidade = itemEditando.id.toString();
-                const idUnico = `${torre}_${fase}_${idUnidade}`;
-
-                setDados(prev => ({ ...prev, [idUnidade]: { status, obs } }));
-                setModalOpen(false);
-                showToast("Dados salvos com sucesso!");
-
-                const { error } = await supabase
-                    .from('vistorias')
-                    .upsert({ 
-                        id: idUnico, torre: torre, fase: fase, unidade: idUnidade,
-                        status: status, obs: status === 'pendente' ? obs : '', updated_at: new Date()
-                    });
-
-                if (error) console.error("Erro ao salvar:", error);
-            };
-
-            const getItemData = (id) => dados[id] || { status: null, obs: "" };
-
-            const calcularProgresso = () => {
-                const total = ANDARES * (AP_POR_ANDAR + 1);
-                const concluidos = Object.values(dados).filter(d => d.status === 'ok').length;
-                return Math.round((concluidos / total) * 100);
-            };
-
-            const progressoAtual = calcularProgresso();
-
-            return (
-                <div className="container">
-                    {/* NOTIFICAÇÃO FLUTUANTE */}
-                    {toast && (
-                        <div className="toast">
-                            <i className="ph-fill ph-check-circle"></i> {toast}
-                        </div>
-                    )}
-
-                    {/* CABEÇALHO DO DASHBOARD */}
-                    <div className="dashboard-header">
-                        <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-start'}}>
-                            <div>
-                                <h1 className="app-title">MRV Gestão</h1>
-                                <span className="app-subtitle">Controle de Qualidade e Pendências</span>
-                            </div>
-                            <div style={{textAlign:'right'}}>
-                                <i className="ph ph-buildings" style={{fontSize: '2rem', color: 'var(--primary)'}}></i>
-                            </div>
-                        </div>
-
-                        <div className="control-grid">
-                            <div className="select-wrapper">
-                                <span className="select-label">Torre</span>
-                                <select value={torre} onChange={e => setTorre(e.target.value)}>
-                                    {TORRES.map(t => <option key={t} value={t}>{t}</option>)}
-                                </select>
-                            </div>
-                            <div className="select-wrapper">
-                                <span className="select-label">Fase da Obra</span>
-                                <select value={fase} onChange={e => setFase(e.target.value)}>
-                                    {FASES.map(f => <option key={f} value={f}>{f}</option>)}
-                                </select>
-                            </div>
-                        </div>
-
-                        {/* BARRA DE PROGRESSO ANIMADA */}
-                        <div className="progress-container">
-                            <div className="progress-header">
-                                <span className="progress-label">STATUS DE CONCLUSÃO</span>
-                                <span className="progress-percent">{progressoAtual}%</span>
-                            </div>
-                            <div className="progress-track">
-                                <div className="progress-fill" style={{width: `${progressoAtual}%`}}></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* GRID DE APARTAMENTOS */}
-                    <div className="building-card">
-                        {loading && <div style={{padding:'20px', textAlign:'center', color:'#666'}}>Carregando unidades...</div>}
-                        
-                        {!loading && Array.from({length: ANDARES}, (_, i) => {
-                            const andar = ANDARES - i;
-                            return (
-                                <div key={andar} className="floor-row">
-                                    <div className="floor-label">{andar}º</div>
-                                    <div className="units-grid">
-                                        {/* HALL */}
-                                        <UnitBox 
-                                            id={`HALL-${andar}`} label="HALL" isHall={true}
-                                            data={getItemData(`HALL-${andar}`)}
-                                            onClick={() => {
-                                                setItemEditando({ id: `HALL-${andar}`, ...getItemData(`HALL-${andar}`) });
-                                                setModalOpen(true);
-                                            }} 
-                                        />
-                                        {/* APARTAMENTOS */}
-                                        {Array.from({length: AP_POR_ANDAR}, (_, j) => {
-                                            const ap = (andar * 100) + (j + 1);
-                                            return (
-                                                <UnitBox 
-                                                    key={ap} id={ap} label={ap}
-                                                    data={getItemData(ap)}
-                                                    onClick={() => {
-                                                        setItemEditando({ id: ap, ...getItemData(ap) });
-                                                        setModalOpen(true);
-                                                    }} 
-                                                />
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-
-                    {/* MODAL DE EDIÇÃO */}
-                    {modalOpen && (
-                        <ModalEditor item={itemEditando} onClose={() => setModalOpen(false)} onSave={handleSaveModal} />
-                    )}
-                </div>
-            );
-        }
-
-        // --- COMPONENTES AUXILIARES ---
-
-        function UnitBox({ id, label, isHall, data, onClick }) {
-            let className = `unit ${isHall ? 'hall' : ''}`;
-            if (data.status === 'ok') className += ' ok';
-            if (data.status === 'pendente') className += ' pendente';
-            
-            return (
-                <div className={className} onClick={onClick}>
-                    {data.status === 'ok' ? <i className="ph-bold ph-check"></i> : 
-                     data.status === 'pendente' ? <i className="ph-bold ph-warning"></i> : label}
-                </div>
-            );
-        }
-
-        function ModalEditor({ item, onClose, onSave }) {
-            const [status, setStatus] = useState(item.status);
-            const [obs, setObs] = useState(item.obs || "");
-
-            return (
-                <div className="modal-overlay" onClick={onClose}>
-                    <div className="modal" onClick={e => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h3 className="modal-title">
-                                {String(item.id).includes('HALL') ? `Hall do ${item.id.split('-')[1]}º Andar` : `Apartamento ${item.id}`}
-                            </h3>
-                            <button className="close-btn" onClick={onClose}>&times;</button>
-                        </div>
-                        
-                        <div className="btn-group">
-                            <div 
-                                className={`btn-option ${status === 'ok' ? 'selected-ok' : ''}`}
-                                onClick={() => setStatus('ok')}
-                            >
-                                <i className="ph-bold ph-thumbs-up"></i> Aprovado
-                            </div>
-                            <div 
-                                className={`btn-option ${status === 'pendente' ? 'selected-error' : ''}`}
-                                onClick={() => setStatus('pendente')}
-                            >
-                                <i className="ph-bold ph-warning-circle"></i> Pendente
-                            </div>
-                        </div>
-                        
-                        {status === 'pendente' && (
-                            <div>
-                                <label style={{fontSize:'0.85rem', fontWeight:'600', marginBottom:'8px', display:'block', color:'#374151'}}>
-                                    O que precisa ser feito?
-                                </label>
-                                <textarea 
-                                    autoFocus 
-                                    value={obs} 
-                                    onChange={e=>setObs(e.target.value)} 
-                                    placeholder="Descreva a falha (ex: Fissura na parede, falta rejunte...)"
-                                ></textarea>
-                            </div>
-                        )}
-                        
-                        <button className="btn-save" onClick={()=>onSave(status, obs)}>
-                            <i className="ph-bold ph-floppy-disk"></i> Salvar Vistoria
-                        </button>
-                    </div>
-                </div>
-            );
-        }
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
-</body>
-</html>
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 99; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+        .modal { background: white; width: 85%; max-width: 400px; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: popIn 0.3s; }
