@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MRV Control - Sistema de Gestão</title>
+    
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <style>
+        :root { --brand: #00D084; --dark: #008f5b; --bg: #f3f4f6; --text: #1f2937; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); margin: 0; padding: 20px; color: var(--text); }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); padding: 20px; margin-bottom: 20px; }
+        
+        .btn { padding: 10px 16px; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; }
+        .btn-primary { background: var(--brand); color: white; }
+        .btn-outline { background: transparent; border: 1px solid #d1d5db; }
+        
+        select { padding: 12px; border-radius: 8px; border: 1px solid #d1d5db; width: 100%; font-size: 1rem; background-color: white; }
+        
+        /* Estilo da Grade */
+        .floor-row { display: flex; align-items: center; margin-bottom: 12px; border-bottom: 1px dashed #e5e7eb; padding-bottom: 12px; }
+        .floor-label { width: 60px; font-weight: bold; color: #6b7280; font-size: 0.9rem; }
+        .units-container { display: flex; flex-wrap: wrap; gap: 8px; }
+        
+        .unit { 
+            width: 48px; height: 48px; border-radius: 8px; 
+            display: flex; align-items: center; justify-content: center; 
+            font-weight: 600; cursor: pointer; background: #e5e7eb; color: #6b7280; 
+            user-select: none; transition: transform 0.1s;
+        }
+        .unit:active { transform: scale(0.95); }
+        .unit.hall { width: 70px; border: 2px dashed #d1d5db; background: transparent; }
+        
+        .bg-ok { background-color: #22c55e; color: white; }
+        .bg-pendente { background-color: #ef4444; color: white; animation: pulse 2s infinite; }
+        
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+        
+        /* Modal */
+        .modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 50; }
+        .modal-content { background: white; width: 90%; max-width: 400px; padding: 24px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); animation: slideUp 0.3s; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        textarea { width: 100%; height: 80px; padding: 10px; border: 1px solid #d1d5db; margin-top: 10px; box-sizing: border-box; font-family: 'Inter', sans-serif; border-radius: 8px; }
+    </style>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- SUAS CREDENCIAIS CONFIGURADAS ---
+        const SUPABASE_URL = 'https://iisvzfzcpxxgkasmteft.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpc3Z6ZnpjcHh4Z2thc210ZWZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNzcyOTgsImV4cCI6MjA3OTk1MzI5OH0.HxkLQxXb8yohwP9nK6IfxGzxH1ItlMwmXpHVZb6qlGo';
+
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const TORRES = Array.from({ length: 8 }, (_, i) => `Torre ${i + 1}`);
+        const FASES = ["1. Pós Forma", "2. Esquadrias", "3. Impermeabilização", "4. Alvenaria Bloco", "5. Fechamento Shaft", "6. Pintura", "7. Entrega Final"];
+        const ANDARES = 8;
+        const AP_POR_ANDAR = 8;
+
+        function App() {
+            const [torre, setTorre] = useState("Torre 1");
+            const [fase, setFase] = useState(FASES[0]);
+            const [dados, setDados] = useState({}); 
+            const [loading, setLoading] = useState(false);
+            const [modalOpen, setModalOpen] = useState(false);
+            const [itemEditando, setItemEditando] = useState(null);
+
+            // Carregar Dados do Supabase
+            useEffect(() => {
+                async function carregarDados() {
+                    setLoading(true);
+                    const { data, error } = await supabase
+                        .from('vistorias')
+                        .select('*')
+                        .eq('torre', torre)
+                        .eq('fase', fase);
+
+                    const mapa = {};
+                    if (data) {
+                        data.forEach(item => {
+                            mapa[item.unidade] = { status: item.status, obs: item.obs };
+                        });
+                    }
+                    setDados(mapa);
+                    setLoading(false);
+                }
+                carregarDados();
+            }, [torre, fase]);
+
+            // Salvar no Supabase
+            const handleSaveModal = async (status, obs) => {
+                const idUnidade = itemEditando.id.toString();
+                const idUnico = `${torre}_${fase}_${idUnidade}`; 
+
+                // Atualização visual imediata
+                setDados(prev => ({ ...prev, [idUnidade]: { status, obs } }));
+                setModalOpen(false);
+
+                // Envio para o Banco
+                const { error } = await supabase
+                    .from('vistorias')
+                    .upsert({ 
+                        id: idUnico,
+                        torre: torre,
+                        fase: fase,
+                        unidade: idUnidade,
+                        status: status,
+                        obs: status === 'pendente' ? obs : '',
+                        updated_at: new Date()
+                    });
+
+                if (error) alert("Erro ao salvar: " + error.message);
+            };
+
+            const getItemData = (id) => dados[id] || { status: null, obs: "" };
+
+            // Cálculo de Progresso
+            const calcularProgresso = () => {
+                const total = ANDARES * (AP_POR_ANDAR + 1); // +1 do Hall
+                const concluidos = Object.values(dados).filter(d => d.status === 'ok').length;
+                return Math.round((concluidos / total) * 100);
+            };
+
+            const progressoAtual = calcularProgresso();
+
+            return (
+                <div className="container">
+                    <div className="card">
+                        <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'15px'}}>
+                            <div>
+                                <h2 style={{margin:0, color:'var(--dark)'}}>MRV Control <span style={{fontSize:'0.6em', color:'#999'}}>SaaS</span></h2>
+                                {loading && <span style={{color:'orange', fontSize:'0.8rem'}}>Atualizando dados...</span>}
+                            </div>
+                            
+                            {/* --- AQUI ESTÁ A BARRA DE PROGRESSO NOVA --- */}
+                            <div style={{width: '180px', textAlign:'right'}}>
+                                <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-end'}}>
+                                    <span style={{fontSize:'0.7rem', color:'#666', fontWeight:'bold', textTransform:'uppercase'}}>Conclusão</span>
+                                    <span style={{fontSize:'1.4rem', fontWeight:'bold', color:'var(--brand)'}}>{progressoAtual}%</span>
+                                </div>
+                                <div style={{width: '100%', background: '#e5e7eb', height: '8px', borderRadius: '4px', marginTop: '4px', overflow: 'hidden'}}>
+                                    <div style={{height: '100%', background: 'var(--brand)', width: `${progressoAtual}%`, transition: 'width 0.5s ease'}}></div>
+                                </div>
+                            </div>
+                            {/* ------------------------------------------- */}
+                        </div>
+                        
+                        <div style={{display:'flex', gap:'10px', flexWrap:'wrap'}}>
+                            <div style={{flex:1}}>
+                                <label style={{fontSize:'0.8rem', fontWeight:'bold', color:'#666'}}>TORRE</label>
+                                <select value={torre} onChange={e => setTorre(e.target.value)}>
+                                    {TORRES.map(t => <option key={t} value={t}>{t}</option>)}
+                                </select>
+                            </div>
+                            <div style={{flex:2, minWidth:'200px'}}>
+                                <label style={{fontSize:'0.8rem', fontWeight:'bold', color:'#666'}}>FASE DA OBRA</label>
+                                <select value={fase} onChange={e => setFase(e.target.value)}>
+                                    {FASES.map(f => <option key={f} value={f}>{f}</option>)}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="card">
+                        {Array.from({length: ANDARES}, (_, i) => {
+                            const andar = ANDARES - i;
+                            return (
+                                <div key={andar} className="floor-row">
+                                    <div className="floor-label">{andar}º</div>
+                                    <div className="units-container">
+                                        <UnitBox 
+                                            id={`HALL-${andar}`} label="H" isHall={true}
+                                            data={getItemData(`HALL-${andar}`)}
+                                            onClick={() => {
+                                                setItemEditando({ id: `HALL-${andar}`, ...getItemData(`HALL-${andar}`) });
+                                                setModalOpen(true);
+                                            }} 
+                                        />
+                                        {Array.from({length: AP_POR_ANDAR}, (_, j) => {
+                                            const ap = (andar * 100) + (j + 1);
+                                            return (
+                                                <UnitBox 
+                                                    key={ap} id={ap} label={ap}
+                                                    data={getItemData(ap)}
+                                                    onClick={() => {
+                                                        setItemEditando({ id: ap, ...getItemData(ap) });
+                                                        setModalOpen(true);
+                                                    }} 
+                                                />
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {modalOpen && (
+                        <ModalEditor item={itemEditando} onClose={() => setModalOpen(false)} onSave={handleSaveModal} />
+                    )}
+                </div>
+            );
+        }
+
+        function UnitBox({ id, label, isHall, data, onClick }) {
+            let className = `unit ${isHall ? 'hall' : ''}`;
+            if (data.status === 'ok') className += ' bg-ok';
+            if (data.status === 'pendente') className += ' bg-pendente';
+            
+            // Ícone se estiver ok
+            const content = data.status === 'ok' ? <i className="ph ph-check" style={{fontSize:'1.2rem'}}></i> : label;
+
+            return <div className={className} onClick={onClick}>{content}</div>;
+        }
+
+        function ModalEditor({ item, onClose, onSave }) {
+            const [status, setStatus] = useState(item.status);
+            const [obs, setObs] = useState(item.obs || "");
+
+            return (
+                <div className="modal-backdrop" onClick={onClose}>
+                    <div className="modal-content" onClick={e => e.stopPropagation()}>
+                        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                            <h3 style={{margin:0}}>Unidade {item.id}</h3>
+                            <button onClick={onClose} style={{background:'none', border:'none', fontSize:'1.5rem', cursor:'pointer'}}>&times;</button>
+                        </div>
+                        <p style={{color:'#666', fontSize:'0.9rem'}}>Selecione a situação atual:</p>
+                        
+                        <div style={{display:'flex', gap:'10px', margin:'20px 0'}}>
+                            <button className="btn" style={{flex:1, background: status==='ok'?'#22c55e':'#f3f4f6', color: status==='ok'?'white':'black'}} onClick={()=>setStatus('ok')}>
+                                <i className="ph ph-thumbs-up"></i> Aprovado
+                            </button>
+                            <button className="btn" style={{flex:1, background: status==='pendente'?'#ef4444':'#f3f4f6', color: status==='pendente'?'white':'black'}} onClick={()=>setStatus('pendente')}>
+                                <i className="ph ph-warning"></i> Pendente
+                            </button>
+                        </div>
+                        
+                        {status === 'pendente' && (
+                            <div>
+                                <label style={{fontSize:'0.8rem', fontWeight:'bold'}}>Descrição do Problema:</label>
+                                <textarea autoFocus value={obs} onChange={e=>setObs(e.target.value)} placeholder="Ex: Mancha na pintura..."></textarea>
+                            </div>
+                        )}
+                        
+                        <button className="btn btn-primary" style={{width:'100%', marginTop:'15px', justifyContent:'center'}} onClick={()=>onSave(status, obs)}>Salvar Informações</button>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html
