@@ -89,12 +89,9 @@
             const [itemEditando, setItemEditando] = useState(null);
             const [toast, setToast] = useState(null);
 
-            // Carrega dados e garante que o objeto de dados está limpo
             useEffect(() => {
                 async function load() {
-                    // Limpa dados antigos visualmente antes de carregar novos
                     setDados({});
-                    
                     const { data } = await supabase
                         .from('vistorias')
                         .select('*')
@@ -102,11 +99,7 @@
                         .eq('fase', fase);
                         
                     const map = {};
-                    if(data) {
-                        data.forEach(i => {
-                            map[i.unidade] = i;
-                        });
-                    }
+                    if(data) data.forEach(i => map[i.unidade] = i);
                     setDados(map);
                 }
                 load();
@@ -114,42 +107,33 @@
 
             const save = async (status, obs) => {
                 const idUnidade = itemEditando.id.toString();
-                // Gera um ID consistente sem espaços extras
                 const idUnico = `${torre}_${fase}_${idUnidade}`.trim();
 
-                // Atualiza visualmente IMEDIATAMENTE (pra ficar rápido)
                 setDados(prev => ({
                     ...prev, 
                     [idUnidade]: { ...prev[idUnidade], status: status, obs: obs }
                 }));
 
                 setModalOpen(false);
-                setToast("Atualizado!");
+                setToast("Salvo com sucesso!");
                 setTimeout(()=>setToast(null), 2500);
 
-                // Envia para o banco com instrução explicita de conflito no ID
                 const { error } = await supabase
                     .from('vistorias')
                     .upsert({
-                        id: idUnico,
-                        torre: torre,
-                        fase: fase,
-                        unidade: idUnidade,
-                        status: status,
-                        obs: status === 'pendente' ? obs : '',
-                        updated_at: new Date()
-                    }, { onConflict: 'id' }); // <--- Garante que substitui se o ID já existir
+                        id: idUnico, torre: torre, fase: fase, unidade: idUnidade,
+                        status: status, obs: status === 'pendente' ? obs : '', updated_at: new Date()
+                    }, { onConflict: 'id' });
 
                 if (error) {
                     console.error("Erro Supabase:", error);
-                    setToast("Erro ao salvar online!");
+                    setToast("Erro ao conectar!");
                 }
             };
 
             const getItem = (id) => dados[id] || {status: null, obs: ''};
             
-            // Cálculo seguro do progresso
-            const totalUnits = ANDARES * 9; // 8 APs + 1 Hall
+            const totalUnits = ANDARES * 9; 
             const doneCount = Object.values(dados).filter(d => d.status === 'ok').length;
             const progresso = Math.round((doneCount / totalUnits) * 100) || 0;
 
@@ -175,28 +159,37 @@
                     <div className="building-card">
                         {Array.from({length: ANDARES}, (_, i) => {
                             const andar = ANDARES - i;
-                            const ladoA = [1, 2, 3, 4];
-                            const ladoB = [5, 6, 7, 8];
+                            
+                            // AQUI ESTÁ A MUDANÇA SOLICITADA:
+                            const linhaCima = [5, 6, 7, 8]; // APs 105-108 no topo
+                            const linhaBaixo = [1, 2, 3, 4]; // APs 101-104 embaixo
                             
                             return (
                                 <div key={andar} className="floor-card">
                                     <div className="floor-badge">{andar}º PAV</div>
                                     <div className="floor-layout">
+                                        
+                                        {/* LINHA DE CIMA (105 a 108) */}
                                         <div className="row-units">
-                                            {ladoA.map(num => {
+                                            {linhaCima.map(num => {
                                                 const ap = (andar * 100) + num;
                                                 return <Unit key={ap} id={ap} data={getItem(ap)} onClick={()=> {setItemEditando({id: ap, ...getItem(ap)}); setModalOpen(true)}} />
                                             })}
                                         </div>
+
+                                        {/* HALL NO MEIO */}
                                         <div className="row-hall">
                                             <Unit id={`HALL-${andar}`} label="HALL" isHall={true} data={getItem(`HALL-${andar}`)} onClick={()=> {setItemEditando({id: `HALL-${andar}`, ...getItem(`HALL-${andar}`)}); setModalOpen(true)}} />
                                         </div>
+
+                                        {/* LINHA DE BAIXO (101 a 104) */}
                                         <div className="row-units">
-                                            {ladoB.map(num => {
+                                            {linhaBaixo.map(num => {
                                                 const ap = (andar * 100) + num;
                                                 return <Unit key={ap} id={ap} data={getItem(ap)} onClick={()=> {setItemEditando({id: ap, ...getItem(ap)}); setModalOpen(true)}} />
                                             })}
                                         </div>
+
                                     </div>
                                 </div>
                             );
