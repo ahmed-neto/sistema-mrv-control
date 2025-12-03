@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MRV Gestão - Equipes</title>
+    <title>MRV Gestão - Final V3</title>
     
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -14,7 +14,6 @@
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
     <style>
-        /* ESTILOS GERAIS */
         :root { --primary: #00D084; --secondary: #2C3E50; --bg: #F0F2F5; --surface: #FFFFFF; --text: #1F2937; --danger: #EF4444; --success: #10B981; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding: 15px; color: var(--text); -webkit-font-smoothing: antialiased; }
         .container { max-width: 600px; margin: 0 auto; padding-bottom: 80px; }
@@ -35,7 +34,6 @@
 
         .unit.ok { background: var(--success); color: white; }
         .unit.pendente { background: var(--danger); color: white; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
 
         /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 100; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
@@ -62,7 +60,7 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // --- CONEXÃO COM O SEU SUPABASE ---
+        // CONEXÃO SUPABASE
         const SUPABASE_URL = 'https://iisvzfzcpxxgkasmteft.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpc3Z6ZnpjcHh4Z2thc210ZWZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNzcyOTgsImV4cCI6MjA3OTk1MzI5OH0.HxkLQxXb8yohwP9nK6IfxGzxH1ItlMwmXpHVZb6qlGo';
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -71,7 +69,6 @@
         const FASES = ["POS FORMA", "ESQUADRIAS", "IMPERMEABILIZAÇÃO", "ALVENARIA BLOCO", "FECHAMENTO SHAFT"];
         const ANDARES = 8;
 
-        // --- SUAS EQUIPES ATUALIZADAS AQUI ---
         const EQUIPES_POR_FASE = {
             "POS FORMA": ["LD", "MOP", "VITHAL"],
             "ESQUADRIAS": ["MOP AURIAN", "MOP HELDE"],
@@ -100,9 +97,15 @@
             }, [torre, fase]);
 
             const save = async (status, obs, equipe) => {
-                const idUnidade = itemEditando.id.toString();
+                // CORREÇÃO CRÍTICA AQUI:
+                // Garantimos que estamos pegando apenas o ID CURTO (ex: "405" ou "HALL-1")
+                // Se itemEditando.id vier sujo, o código abaixo limparia, mas a correção real está no onClick
+                const idUnidade = itemEditando.id.toString(); 
+                
+                // Monta o ID único corretamente: Torre_Fase_405
                 const idUnico = `${torre}_${fase}_${idUnidade}`.trim();
-                const obsFinal = status === 'ok' ? '' : obs; // Limpa texto se estiver ok
+                
+                const obsFinal = status === 'ok' ? '' : obs; 
 
                 // Atualiza tela
                 setDados(prev => ({
@@ -116,8 +119,13 @@
 
                 // Salva no banco
                 const { error } = await supabase.from('vistorias').upsert({
-                    id: idUnico, torre, fase, unidade: idUnidade,
-                    status, obs: obsFinal, equipe, 
+                    id: idUnico, 
+                    torre, 
+                    fase, 
+                    unidade: idUnidade, // Salva "405" puro na coluna unidade
+                    status, 
+                    obs: obsFinal, 
+                    equipe, 
                     updated_at: new Date()
                 }, { onConflict: 'id' });
 
@@ -126,6 +134,14 @@
 
             const getItem = (id) => dados[id] || {status: null, obs: '', equipe: ''};
             
+            // Lógica do Clique (AQUI ESTAVA O PROBLEMA ANTERIOR)
+            // Agora usamos: { ...getItem(ap), id: ap }
+            // Isso garante que o 'id' seja sempre o número puro (ap), e não o id longo do banco
+            const handleUnitClick = (ap) => {
+                setItemEditando({ ...getItem(ap), id: ap });
+                setModalOpen(true);
+            };
+
             const totalUnits = ANDARES * 9;
             const doneCount = Object.values(dados).filter(d => d.status === 'ok').length;
             const progresso = Math.round((doneCount / totalUnits) * 100) || 0;
@@ -153,7 +169,6 @@
                     <div className="building-card">
                         {Array.from({length: ANDARES}, (_, i) => {
                             const andar = ANDARES - i;
-                            // Layout do Corredor: 105-108 no topo, Hall meio, 101-104 baixo
                             return (
                                 <div key={andar} className="floor-card">
                                     <div className="floor-badge">{andar}º PAV</div>
@@ -161,16 +176,16 @@
                                         <div className="row-units">
                                             {[5,6,7,8].map(n => {
                                                 const ap = (andar*100)+n;
-                                                return <Unit key={ap} id={ap} data={getItem(ap)} onClick={()=>{setItemEditando({id:ap, ...getItem(ap)}); setModalOpen(true)}} />
+                                                return <Unit key={ap} id={ap} data={getItem(ap)} onClick={()=>handleUnitClick(ap)} />
                                             })}
                                         </div>
                                         <div className="row-hall">
-                                            <Unit id={`HALL-${andar}`} label="HALL" isHall={true} data={getItem(`HALL-${andar}`)} onClick={()=>{setItemEditando({id:`HALL-${andar}`, ...getItem(`HALL-${andar}`)}); setModalOpen(true)}} />
+                                            <Unit id={`HALL-${andar}`} label="HALL" isHall={true} data={getItem(`HALL-${andar}`)} onClick={()=>handleUnitClick(`HALL-${andar}`)} />
                                         </div>
                                         <div className="row-units">
                                             {[1,2,3,4].map(n => {
                                                 const ap = (andar*100)+n;
-                                                return <Unit key={ap} id={ap} data={getItem(ap)} onClick={()=>{setItemEditando({id:ap, ...getItem(ap)}); setModalOpen(true)}} />
+                                                return <Unit key={ap} id={ap} data={getItem(ap)} onClick={()=>handleUnitClick(ap)} />
                                             })}
                                         </div>
                                     </div>
@@ -199,7 +214,6 @@
             const [obs, setObs] = useState(item.obs || "");
             const [equipe, setEquipe] = useState(item.equipe || ""); 
 
-            // Carrega as equipes da fase atual
             const listaEquipes = EQUIPES_POR_FASE[faseAtual] || [];
 
             return (
