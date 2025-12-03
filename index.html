@@ -22,6 +22,11 @@
         .control-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 10px; margin-top: 15px; }
         select, input[type="date"] { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F9FAFB; font-weight: 600; color: var(--secondary); font-size: 0.9rem; appearance: none; box-sizing: border-box; }
 
+        /* TELHADO / COBERTURA */
+        .roof-card { background: #374151; color: white; padding: 15px; border-radius: 12px 12px 4px 4px; margin-bottom: 10px; text-align: center; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 2px solid transparent; transition: 0.2s; }
+        .roof-card.ok { background: var(--success); border-color: var(--success); }
+        .roof-card.pendente { background: var(--danger); animation: pulse 2s infinite; }
+
         .floor-card { background: var(--surface); border-radius: 12px; padding: 15px; padding-top: 40px; box-shadow: 0 2px 4px rgba(0,0,0,0.03); position: relative; margin-bottom: 15px; }
         .floor-badge { position: absolute; top: 10px; left: 10px; background: var(--secondary); color: white; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 6px; }
         .floor-layout { display: flex; flex-direction: column; gap: 8px; }
@@ -34,6 +39,7 @@
 
         .unit.ok { background: var(--success); color: white; }
         .unit.pendente { background: var(--danger); color: white; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
 
         /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 100; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
@@ -41,24 +47,19 @@
         @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
         .label-section { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #9CA3AF; margin-bottom: 6px; display: block; margin-top: 15px; }
-        
         .btn-group { display: flex; gap: 10px; margin-bottom: 5px; }
         .btn-opt { flex: 1; padding: 14px; border-radius: 10px; border: 2px solid #F3F4F6; background: white; font-weight: 600; cursor: pointer; text-align: center; color: var(--text); display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
         .btn-opt.sel-ok { background: var(--success); color: white; border-color: var(--success); }
         .btn-opt.sel-err { background: var(--danger); color: white; border-color: var(--danger); }
-
         textarea { width: 100%; padding: 12px; border: 1px solid #D1D5DB; border-radius: 8px; height: 70px; font-family: inherit; margin-bottom: 10px; box-sizing: border-box; resize: none; }
         .btn-save { width: 100%; padding: 16px; background: var(--secondary); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; margin-top: 10px; font-size: 1rem; }
 
-        /* RELATÓRIO STYLE */
-        .btn-report { background: #E0E7FF; color: #3730A3; border: none; padding: 8px 16px; border-radius: 20px; font-weight: 600; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 5px; margin-top: 10px; width: 100%; justify-content: center; }
-        .report-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.85rem; }
-        .report-table th { text-align: left; color: #6B7280; font-weight: 700; padding-bottom: 8px; border-bottom: 2px solid #E5E7EB; }
-        .report-table td { padding: 10px 0; border-bottom: 1px solid #F3F4F6; color: var(--secondary); }
-        .metric-box { background: #F9FAFB; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #E5E7EB; }
-        .metric-val { font-size: 1.2rem; font-weight: 800; color: var(--secondary); display: block; }
-        .metric-lbl { font-size: 0.7rem; color: #6B7280; font-weight: 700; text-transform: uppercase; }
-
+        /* RELATÓRIO */
+        .btn-report { background: #E0E7FF; color: #3730A3; border: none; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 8px; margin-top: 15px; width: 100%; justify-content: center; transition: 0.2s; }
+        .prod-card { background: #F3F4F6; padding: 15px; border-radius: 10px; text-align: center; border: 1px solid #E5E7EB; margin-top: 15px; }
+        .prod-val { font-size: 2.5rem; font-weight: 800; color: var(--primary); display: block; line-height: 1; }
+        .prod-sub { font-size: 0.9rem; color: #6B7280; margin-top: 5px; display: block; font-weight: 600; }
+        
         .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #1F2937; color: white; padding: 12px 24px; border-radius: 30px; font-size: 0.9rem; font-weight: 600; z-index: 200; display: flex; align-items: center; gap: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
     </style>
 </head>
@@ -90,14 +91,11 @@
             const [fase, setFase] = useState(FASES[0]);
             const [dados, setDados] = useState({});
             
-            // MODAIS
             const [modalOpen, setModalOpen] = useState(false);
-            const [reportOpen, setReportOpen] = useState(false); // Novo Modal de Relatório
-            
+            const [reportOpen, setReportOpen] = useState(false);
             const [itemEditando, setItemEditando] = useState(null);
             const [toast, setToast] = useState(null);
 
-            // Carrega dados da Torre/Fase atual
             useEffect(() => {
                 async function load() {
                     setDados({});
@@ -109,7 +107,27 @@
                 load();
             }, [torre, fase]);
 
-            // Salva Vistoria
+            // --- REGRAS DE VISIBILIDADE ---
+            const isAlvenaria = fase === "ALVENARIA BLOCO";
+
+            // Verifica se a unidade deve aparecer na tela
+            const shouldShow = (num) => {
+                if(!isAlvenaria) return true; // Se não for Alvenaria, mostra tudo
+                // Se for Alvenaria, só mostra finais 3, 4, 5, 6
+                const final = num % 10;
+                return [3, 4, 5, 6].includes(final);
+            };
+
+            // Cálculo do Escopo Total para Porcentagem
+            const calcularEscopoTotal = () => {
+                if (isAlvenaria) {
+                    // 4 aptos por andar * 8 andares + 1 Cobertura
+                    return (4 * 8) + 1; 
+                }
+                // Padrão: 8 aptos * 8 andares + 8 halls
+                return (8 * 8) + 8;
+            };
+
             const save = async (status, obs, equipe) => {
                 const idUnidade = itemEditando.id.toString();
                 const idUnico = `${torre}_${fase}_${idUnidade}`.trim();
@@ -134,15 +152,28 @@
 
             const getItem = (id) => dados[id] || {status: null, obs: '', equipe: ''};
             
-            // Lógica do Clique
             const handleUnitClick = (ap) => {
                 setItemEditando({ ...getItem(ap), id: ap });
                 setModalOpen(true);
             };
 
-            const totalUnits = ANDARES * 9;
-            const doneCount = Object.values(dados).filter(d => d.status === 'ok').length;
-            const progresso = Math.round((doneCount / totalUnits) * 100) || 0;
+            // Progresso Visual
+            const totalScope = calcularEscopoTotal();
+            // Filtra o doneCount baseado nas mesmas regras de visibilidade
+            const doneCount = Object.keys(dados).filter(key => {
+                const item = dados[key];
+                if(item.status !== 'ok') return false;
+                
+                // Validação de Escopo no Count
+                if(key === "COBERTURA") return isAlvenaria; 
+                if(String(key).includes("HALL")) return !isAlvenaria;
+                
+                const num = parseInt(key);
+                if(!isNaN(num)) return shouldShow(num);
+                return false;
+            }).length;
+
+            const progresso = Math.round((doneCount / totalScope) * 100) || 0;
 
             return (
                 <div className="container">
@@ -156,14 +187,13 @@
                             <select value={fase} onChange={e=>setFase(e.target.value)}>{FASES.map(f=><option key={f}>{f}</option>)}</select>
                         </div>
 
-                        {/* BOTÃO DE RELATÓRIO NOVO */}
                         <button className="btn-report" onClick={()=>setReportOpen(true)}>
-                            <i className="ph-bold ph-chart-bar"></i> Gerar Relatório de Equipes
+                            <i className="ph-bold ph-calendar-check"></i> Relatório de Produção
                         </button>
 
                         <div style={{marginTop:15}}>
                             <div style={{display:'flex', justifyContent:'space-between', marginBottom:5, fontSize:'0.7rem', fontWeight:'bold', color:'#666'}}>
-                                <span>CONCLUSÃO TORRE</span> <span>{progresso}%</span>
+                                <span>AVANÇO FÍSICO ({fase === 'ALVENARIA BLOCO' ? 'Reduzido' : 'Total'})</span> <span>{progresso}%</span>
                             </div>
                             <div style={{height:8, background:'#E5E7EB', borderRadius:10, overflow:'hidden'}}>
                                 <div style={{width:`${progresso}%`, height:'100%', background:'var(--primary)', transition:'width 0.5s ease'}}></div>
@@ -171,24 +201,44 @@
                         </div>
                     </div>
 
+                    {/* COBERTURA (SÓ ALVENARIA) */}
+                    {isAlvenaria && (
+                        <div className={`roof-card ${getItem('COBERTURA').status}`} onClick={()=>handleUnitClick('COBERTURA')}>
+                            <i className="ph-fill ph-house-line"></i> Cobertura / Telhado
+                        </div>
+                    )}
+
                     <div className="building-card">
                         {Array.from({length: ANDARES}, (_, i) => {
                             const andar = ANDARES - i;
+                            
+                            // Define quais APs mostrar baseado na fase
+                            const linhaCima = isAlvenaria ? [5, 6] : [5, 6, 7, 8];
+                            const linhaBaixo = isAlvenaria ? [3, 4] : [1, 2, 3, 4];
+
                             return (
                                 <div key={andar} className="floor-card">
                                     <div className="floor-badge">{andar}º PAV</div>
                                     <div className="floor-layout">
+                                        
+                                        {/* LINHA CIMA */}
                                         <div className="row-units">
-                                            {[5,6,7,8].map(n => {
+                                            {linhaCima.map(n => {
                                                 const ap = (andar*100)+n;
                                                 return <Unit key={ap} id={ap} data={getItem(ap)} onClick={()=>handleUnitClick(ap)} />
                                             })}
                                         </div>
-                                        <div className="row-hall">
-                                            <Unit id={`HALL-${andar}`} label="HALL" isHall={true} data={getItem(`HALL-${andar}`)} onClick={()=>handleUnitClick(`HALL-${andar}`)} />
-                                        </div>
+
+                                        {/* HALL (SOME NA ALVENARIA) */}
+                                        {!isAlvenaria && (
+                                            <div className="row-hall">
+                                                <Unit id={`HALL-${andar}`} label="HALL" isHall={true} data={getItem(`HALL-${andar}`)} onClick={()=>handleUnitClick(`HALL-${andar}`)} />
+                                            </div>
+                                        )}
+
+                                        {/* LINHA BAIXO */}
                                         <div className="row-units">
-                                            {[1,2,3,4].map(n => {
+                                            {linhaBaixo.map(n => {
                                                 const ap = (andar*100)+n;
                                                 return <Unit key={ap} id={ap} data={getItem(ap)} onClick={()=>handleUnitClick(ap)} />
                                             })}
@@ -201,7 +251,13 @@
 
                     {modalOpen && <ModalVistoria item={itemEditando} faseAtual={fase} onClose={()=>setModalOpen(false)} onSave={save} />}
                     
-                    {reportOpen && <ModalRelatorio onClose={()=>setReportOpen(false)} supabase={supabase} />}
+                    {reportOpen && <ModalProducao 
+                        onClose={()=>setReportOpen(false)} 
+                        supabase={supabase} 
+                        torreAtual={torre} 
+                        faseAtual={fase}
+                        totalEscopo={totalScope}
+                    />}
                 </div>
             );
         }
@@ -216,35 +272,33 @@
             return <div className={cls} onClick={onClick}>{content}</div>;
         }
 
-        // --- NOVO MODAL DE RELATÓRIO ---
-        function ModalRelatorio({ onClose, supabase }) {
+        // --- RELATÓRIO DE PRODUÇÃO FÍSICA ---
+        function ModalProducao({ onClose, supabase, torreAtual, faseAtual, totalEscopo }) {
             const [dtInicio, setDtInicio] = useState('');
             const [dtFim, setDtFim] = useState('');
             const [loading, setLoading] = useState(false);
-            const [resultado, setResultado] = useState(null);
+            const [stats, setStats] = useState(null);
 
             const gerar = async () => {
                 if(!dtInicio || !dtFim) return alert("Selecione as datas!");
                 setLoading(true);
                 
-                // Busca TUDO no período (independente de torre)
-                const { data, error } = await supabase
+                // Busca APENAS o que foi produzido (OK) na Torre e Fase atuais no período
+                const { data, count, error } = await supabase
                     .from('vistorias')
-                    .select('*')
+                    .select('*', { count: 'exact' })
+                    .eq('torre', torreAtual)
+                    .eq('fase', faseAtual)
+                    .eq('status', 'ok') // Só conta o que foi APROVADO
                     .gte('updated_at', dtInicio + 'T00:00:00')
                     .lte('updated_at', dtFim + 'T23:59:59');
 
                 if(data) {
-                    const stats = {};
-                    data.forEach(item => {
-                        const eq = item.equipe || "SEM EQUIPE";
-                        if(!stats[eq]) stats[eq] = { total: 0, ok: 0, pendente: 0 };
-                        
-                        stats[eq].total++;
-                        if(item.status === 'ok') stats[eq].ok++;
-                        if(item.status === 'pendente') stats[eq].pendente++;
-                    });
-                    setResultado(stats);
+                    // Calculando porcentagem produzida no período
+                    const produced = count || 0;
+                    const percent = totalEscopo > 0 ? Math.round((produced / totalEscopo) * 100) : 0;
+                    
+                    setStats({ produced, percent });
                 }
                 setLoading(false);
             };
@@ -252,7 +306,8 @@
             return (
                 <div className="modal-overlay" onClick={onClose}>
                     <div className="modal" onClick={e=>e.stopPropagation()}>
-                        <h3 style={{marginTop:0, color:'var(--secondary)'}}>Relatório de Produtividade</h3>
+                        <h3 style={{marginTop:0, color:'var(--secondary)'}}>Produção: {torreAtual}</h3>
+                        <p style={{fontSize:'0.85rem', color:'#666', marginBottom:20}}>Fase: <strong>{faseAtual}</strong></p>
                         
                         <div style={{display:'flex', gap:10, marginBottom:15}}>
                             <div style={{flex:1}}>
@@ -266,36 +321,22 @@
                         </div>
 
                         <button className="btn-save" onClick={gerar} disabled={loading} style={{background: loading ? '#ccc' : 'var(--primary)'}}>
-                            {loading ? 'CALCULANDO...' : 'GERAR RELATÓRIO'}
+                            {loading ? 'BUSCANDO...' : 'CALCULAR PRODUÇÃO'}
                         </button>
 
-                        {resultado && (
-                            <div style={{marginTop:20}}>
-                                <span className="label-section">RESULTADO POR EQUIPE</span>
-                                <table className="report-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Equipe</th>
-                                            <th style={{textAlign:'center'}}>OK</th>
-                                            <th style={{textAlign:'center'}}>PEND</th>
-                                            <th style={{textAlign:'right'}}>% Aprov</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {Object.keys(resultado).map(eq => {
-                                            const r = resultado[eq];
-                                            const perc = Math.round((r.ok / r.total) * 100);
-                                            return (
-                                                <tr key={eq}>
-                                                    <td>{eq}</td>
-                                                    <td style={{textAlign:'center', fontWeight:'bold', color:'var(--success)'}}>{r.ok}</td>
-                                                    <td style={{textAlign:'center', fontWeight:'bold', color:'var(--danger)'}}>{r.pendente}</td>
-                                                    <td style={{textAlign:'right', fontWeight:'800'}}>{perc}%</td>
-                                                </tr>
-                                            )
-                                        })}
-                                    </tbody>
-                                </table>
+                        {stats && (
+                            <div style={{animation:'slideUp 0.3s'}}>
+                                <div className="prod-card">
+                                    <span className="prod-val">{stats.produced}</span>
+                                    <span className="prod-sub">UNIDADES APROVADAS</span>
+                                </div>
+                                <div className="prod-card" style={{marginTop:10, borderColor:'var(--primary)', background:'#ECFDF5'}}>
+                                    <span className="prod-val" style={{color:'var(--success)'}}>{stats.percent}%</span>
+                                    <span className="prod-sub">DA TORRE NESTE PERÍODO</span>
+                                </div>
+                                <p style={{textAlign:'center', fontSize:'0.8rem', color:'#999', marginTop:15}}>
+                                    Base de cálculo: {totalEscopo} unidades totais previstos para esta fase.
+                                </p>
                             </div>
                         )}
                         
@@ -305,20 +346,19 @@
             )
         }
 
-        // --- MODAL DE VISTORIA (ANTIGO) ---
+        // --- MODAL VISTORIA PADRÃO ---
         function ModalVistoria({ item, faseAtual, onClose, onSave }) {
             const [status, setStatus] = useState(item.status);
             const [obs, setObs] = useState(item.obs || "");
             const [equipe, setEquipe] = useState(item.equipe || ""); 
-
             const listaEquipes = EQUIPES_POR_FASE[faseAtual] || [];
 
             return (
                 <div className="modal-overlay" onClick={onClose}>
                     <div className="modal" onClick={e=>e.stopPropagation()}>
-                        <h3 style={{marginTop:0, color:'var(--secondary)'}}>{String(item.id).includes('HALL')?'Hall':'Apto '+item.id}</h3>
+                        <h3 style={{marginTop:0, color:'var(--secondary)'}}>{String(item.id).includes('HALL')?'Hall':(item.id === 'COBERTURA' ? 'Cobertura' : 'Apto '+item.id)}</h3>
                         
-                        <span className="label-section">1. SELECIONE A EQUIPE</span>
+                        <span className="label-section">1. EQUIPE</span>
                         <select value={equipe} onChange={e=>setEquipe(e.target.value)} style={{marginBottom:15}}>
                             <option value="">-- Selecione --</option>
                             {listaEquipes.map(eq => <option key={eq} value={eq}>{eq}</option>)}
