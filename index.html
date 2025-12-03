@@ -3,79 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MRV Gestão - Mobile</title>
+    <title>MRV Gestão - Equipes</title>
     
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
     <style>
-        :root { --primary: #00D084; --secondary: #2C3E50; --bg-body: #F0F2F5; --surface: #FFFFFF; --text-main: #111827; --danger: #EF4444; --success: #10B981; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); margin: 0; padding: 15px; color: var(--text-main); -webkit-font-smoothing: antialiased; }
-        .container { max-width: 600px; margin: 0 auto; padding-bottom: 60px; }
+        /* ESTILOS GERAIS */
+        :root { --primary: #00D084; --secondary: #2C3E50; --bg: #F0F2F5; --surface: #FFFFFF; --text: #1F2937; --danger: #EF4444; --success: #10B981; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding: 15px; color: var(--text); -webkit-font-smoothing: antialiased; }
+        .container { max-width: 600px; margin: 0 auto; padding-bottom: 80px; }
 
-        /* HEADER */
         .dashboard-header { background: var(--surface); padding: 20px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; border-top: 4px solid var(--primary); }
-        .app-title { margin: 0; font-size: 1.25rem; font-weight: 700; color: var(--secondary); }
-        
-        /* CONTROLS */
         .control-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 10px; margin-top: 15px; }
-        select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F9FAFB; font-weight: 600; color: var(--secondary); font-size: 0.9rem; }
-        
-        /* PROGRESSO */
-        .progress-container { margin-top: 15px; }
-        .progress-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 5px; }
-        .progress-track { width: 100%; height: 8px; background: #E5E7EB; border-radius: 10px; overflow: hidden; }
-        .progress-fill { height: 100%; background: var(--primary); transition: width 0.5s ease; }
+        select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F9FAFB; font-weight: 600; color: var(--secondary); font-size: 0.9rem; appearance: none; }
 
-        /* LAYOUT PREDIAL */
-        .building-card { display: flex; flex-direction: column; gap: 15px; }
-        .floor-card { background: var(--surface); border-radius: 12px; padding: 15px; padding-top: 35px; box-shadow: 0 2px 4px rgba(0,0,0,0.03); position: relative; }
+        .floor-card { background: var(--surface); border-radius: 12px; padding: 15px; padding-top: 40px; box-shadow: 0 2px 4px rgba(0,0,0,0.03); position: relative; margin-bottom: 15px; }
         .floor-badge { position: absolute; top: 10px; left: 10px; background: var(--secondary); color: white; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 6px; }
-        
         .floor-layout { display: flex; flex-direction: column; gap: 8px; }
         .row-units { display: flex; gap: 8px; justify-content: center; }
         .row-hall { display: flex; justify-content: center; margin: 5px 0; }
 
-        /* QUADRADINHOS */
-        .unit { flex: 1; height: 45px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; cursor: pointer; background: #F3F4F6; color: #9CA3AF; transition: transform 0.1s; user-select: none; border: 1px solid transparent; }
+        .unit { flex: 1; height: 48px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 700; cursor: pointer; background: #F3F4F6; color: #9CA3AF; transition: transform 0.1s; border: 1px solid transparent; user-select: none; }
         .unit:active { transform: scale(0.95); }
         .unit.hall-btn { max-width: 140px; height: 32px; background: transparent; border: 2px dashed #D1D5DB; color: #6B7280; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* STATUS */
-        .unit.ok { background: var(--success); color: white; box-shadow: 0 2px 5px rgba(16, 185, 129, 0.3); }
-        .unit.pendente { background: var(--danger); color: white; box-shadow: 0 2px 5px rgba(239, 68, 68, 0.3); animation: pulse 2s infinite; }
+        .unit.ok { background: var(--success); color: white; }
+        .unit.pendente { background: var(--danger); color: white; animation: pulse 2s infinite; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
 
         /* MODAL */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 99; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
-        .modal { background: white; width: 85%; max-width: 380px; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        
-        .modal-title { font-size: 1.1rem; font-weight: 700; color: var(--secondary); margin: 0 0 5px 0; }
-        .modal-subtitle { font-size: 0.85rem; color: #6B7280; margin-bottom: 20px; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 100; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        .modal { background: white; width: 90%; max-width: 380px; padding: 24px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        .label-section { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #9CA3AF; margin-bottom: 8px; display: block; }
-
-        .btn-group { display: flex; gap: 10px; margin-bottom: 20px; }
-        .btn-opt { flex: 1; padding: 12px; border-radius: 10px; border: 2px solid #F3F4F6; background: white; font-weight: 600; cursor: pointer; text-align: center; color: var(--text-main); transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px;}
+        .label-section { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #9CA3AF; margin-bottom: 6px; display: block; margin-top: 15px; }
         
+        .btn-group { display: flex; gap: 10px; margin-bottom: 5px; }
+        .btn-opt { flex: 1; padding: 14px; border-radius: 10px; border: 2px solid #F3F4F6; background: white; font-weight: 600; cursor: pointer; text-align: center; color: var(--text); display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
         .btn-opt.sel-ok { background: var(--success); color: white; border-color: var(--success); }
         .btn-opt.sel-err { background: var(--danger); color: white; border-color: var(--danger); }
-        
-        /* Campo Pequeno de Texto */
-        textarea { width: 100%; padding: 12px; border: 1px solid #D1D5DB; border-radius: 8px; height: 60px; font-family: inherit; margin-bottom: 20px; box-sizing: border-box; font-size: 0.9rem; resize: none; }
-        textarea:focus { outline: none; border-color: var(--secondary); }
 
-        .btn-save { width: 100%; padding: 14px; background: var(--secondary); color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 1rem; }
-        
-        /* TOAST */
-        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #1F2937; color: white; padding: 10px 20px; border-radius: 30px; font-size: 0.85rem; font-weight: 600; z-index: 200; display: flex; align-items: center; gap: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        textarea { width: 100%; padding: 12px; border: 1px solid #D1D5DB; border-radius: 8px; height: 70px; font-family: inherit; margin-bottom: 10px; box-sizing: border-box; resize: none; }
+        .btn-save { width: 100%; padding: 16px; background: var(--secondary); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; margin-top: 10px; font-size: 1rem; }
+
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #1F2937; color: white; padding: 12px 24px; border-radius: 30px; font-size: 0.9rem; font-weight: 600; z-index: 200; display: flex; align-items: center; gap: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
     </style>
 </head>
 <body>
@@ -85,6 +62,7 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
+        // --- CONEXÃO COM O SEU SUPABASE ---
         const SUPABASE_URL = 'https://iisvzfzcpxxgkasmteft.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpc3Z6ZnpjcHh4Z2thc210ZWZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNzcyOTgsImV4cCI6MjA3OTk1MzI5OH0.HxkLQxXb8yohwP9nK6IfxGzxH1ItlMwmXpHVZb6qlGo';
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -92,6 +70,15 @@
         const TORRES = ["Torre 5", "Torre 2", "Torre 3", "Torre 4"];
         const FASES = ["POS FORMA", "ESQUADRIAS", "IMPERMEABILIZAÇÃO", "ALVENARIA BLOCO", "FECHAMENTO SHAFT"];
         const ANDARES = 8;
+
+        // --- SUAS EQUIPES ATUALIZADAS AQUI ---
+        const EQUIPES_POR_FASE = {
+            "POS FORMA": ["LD", "MOP", "VITHAL"],
+            "ESQUADRIAS": ["MOP AURIAN", "MOP HELDE"],
+            "IMPERMEABILIZAÇÃO": ["LD BRIAGE"],
+            "ALVENARIA BLOCO": ["LD"],
+            "FECHAMENTO SHAFT": ["LW", "TOP LIMPE"]
+        };
 
         function App() {
             const [torre, setTorre] = useState(TORRES[0]);
@@ -103,13 +90,8 @@
 
             useEffect(() => {
                 async function load() {
-                    setDados({}); // Limpa visualmente para evitar confusão
-                    const { data } = await supabase
-                        .from('vistorias')
-                        .select('*')
-                        .eq('torre', torre)
-                        .eq('fase', fase);
-                        
+                    setDados({});
+                    const { data } = await supabase.from('vistorias').select('*').eq('torre', torre).eq('fase', fase);
                     const map = {};
                     if(data) data.forEach(i => map[i.unidade] = i);
                     setDados(map);
@@ -117,45 +99,32 @@
                 load();
             }, [torre, fase]);
 
-            const save = async (status, obs) => {
+            const save = async (status, obs, equipe) => {
                 const idUnidade = itemEditando.id.toString();
                 const idUnico = `${torre}_${fase}_${idUnidade}`.trim();
+                const obsFinal = status === 'ok' ? '' : obs; // Limpa texto se estiver ok
 
-                // TRUQUE PARA CORRIGIR O BUG:
-                // Se o status for OK, forçamos a obs a ser vazia ("").
-                // Isso garante que o Supabase entenda que a pendência acabou.
-                const obsFinal = status === 'ok' ? '' : obs;
-
-                // Atualiza visual (Optimistic Update)
+                // Atualiza tela
                 setDados(prev => ({
                     ...prev, 
-                    [idUnidade]: { ...prev[idUnidade], status: status, obs: obsFinal }
+                    [idUnidade]: { ...prev[idUnidade], status, obs: obsFinal, equipe }
                 }));
-
+                
                 setModalOpen(false);
                 setToast("Salvo com sucesso!");
                 setTimeout(()=>setToast(null), 2500);
 
-                // Envia para o Banco
-                const { error } = await supabase
-                    .from('vistorias')
-                    .upsert({
-                        id: idUnico, 
-                        torre: torre, 
-                        fase: fase, 
-                        unidade: idUnidade,
-                        status: status,
-                        obs: obsFinal, // Enviamos a obs vazia se estiver OK
-                        updated_at: new Date()
-                    }, { onConflict: 'id' });
+                // Salva no banco
+                const { error } = await supabase.from('vistorias').upsert({
+                    id: idUnico, torre, fase, unidade: idUnidade,
+                    status, obs: obsFinal, equipe, 
+                    updated_at: new Date()
+                }, { onConflict: 'id' });
 
-                if (error) {
-                    console.error("Erro Supabase:", error);
-                    setToast("Erro ao salvar! Tente novamente.");
-                }
+                if (error) { console.error(error); setToast("Erro ao salvar!"); }
             };
 
-            const getItem = (id) => dados[id] || {status: null, obs: ''};
+            const getItem = (id) => dados[id] || {status: null, obs: '', equipe: ''};
             
             const totalUnits = ANDARES * 9;
             const doneCount = Object.values(dados).filter(d => d.status === 'ok').length;
@@ -166,47 +135,42 @@
                     {toast && <div className="toast"><i className="ph-fill ph-check-circle"></i> {toast}</div>}
 
                     <div className="dashboard-header">
-                        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-                            <h1 className="app-title">MRV Gestão</h1>
-                            <i className="ph-duotone ph-buildings" style={{fontSize:'1.5rem', color:'var(--secondary)'}}></i>
-                        </div>
-                        
+                        <h1 style={{margin:0, color:'var(--secondary)'}}>MRV Gestão</h1>
                         <div className="control-grid">
                             <select value={torre} onChange={e=>setTorre(e.target.value)}>{TORRES.map(t=><option key={t}>{t}</option>)}</select>
                             <select value={fase} onChange={e=>setFase(e.target.value)}>{FASES.map(f=><option key={f}>{f}</option>)}</select>
                         </div>
-                        <div className="progress-container">
-                            <div className="progress-header">
-                                <span style={{fontSize:'0.7rem', fontWeight:'800', color:'#9CA3AF'}}>CONCLUSÃO</span>
-                                <span style={{fontSize:'1.1rem', fontWeight:'800', color:'var(--primary)'}}>{progresso}%</span>
+                        <div style={{marginTop:15}}>
+                            <div style={{display:'flex', justifyContent:'space-between', marginBottom:5, fontSize:'0.7rem', fontWeight:'bold', color:'#666'}}>
+                                <span>CONCLUSÃO</span> <span>{progresso}%</span>
                             </div>
-                            <div className="progress-track"><div className="progress-fill" style={{width:`${progresso}%`}}></div></div>
+                            <div style={{height:8, background:'#E5E7EB', borderRadius:10, overflow:'hidden'}}>
+                                <div style={{width:`${progresso}%`, height:'100%', background:'var(--primary)', transition:'width 0.5s ease'}}></div>
+                            </div>
                         </div>
                     </div>
 
                     <div className="building-card">
                         {Array.from({length: ANDARES}, (_, i) => {
                             const andar = ANDARES - i;
-                            const linhaCima = [5, 6, 7, 8];
-                            const linhaBaixo = [1, 2, 3, 4];
-                            
+                            // Layout do Corredor: 105-108 no topo, Hall meio, 101-104 baixo
                             return (
                                 <div key={andar} className="floor-card">
                                     <div className="floor-badge">{andar}º PAV</div>
                                     <div className="floor-layout">
                                         <div className="row-units">
-                                            {linhaCima.map(num => {
-                                                const ap = (andar * 100) + num;
-                                                return <Unit key={ap} id={ap} data={getItem(ap)} onClick={()=> {setItemEditando({id: ap, ...getItem(ap)}); setModalOpen(true)}} />
+                                            {[5,6,7,8].map(n => {
+                                                const ap = (andar*100)+n;
+                                                return <Unit key={ap} id={ap} data={getItem(ap)} onClick={()=>{setItemEditando({id:ap, ...getItem(ap)}); setModalOpen(true)}} />
                                             })}
                                         </div>
                                         <div className="row-hall">
-                                            <Unit id={`HALL-${andar}`} label="HALL" isHall={true} data={getItem(`HALL-${andar}`)} onClick={()=> {setItemEditando({id: `HALL-${andar}`, ...getItem(`HALL-${andar}`)}); setModalOpen(true)}} />
+                                            <Unit id={`HALL-${andar}`} label="HALL" isHall={true} data={getItem(`HALL-${andar}`)} onClick={()=>{setItemEditando({id:`HALL-${andar}`, ...getItem(`HALL-${andar}`)}); setModalOpen(true)}} />
                                         </div>
                                         <div className="row-units">
-                                            {linhaBaixo.map(num => {
-                                                const ap = (andar * 100) + num;
-                                                return <Unit key={ap} id={ap} data={getItem(ap)} onClick={()=> {setItemEditando({id: ap, ...getItem(ap)}); setModalOpen(true)}} />
+                                            {[1,2,3,4].map(n => {
+                                                const ap = (andar*100)+n;
+                                                return <Unit key={ap} id={ap} data={getItem(ap)} onClick={()=>{setItemEditando({id:ap, ...getItem(ap)}); setModalOpen(true)}} />
                                             })}
                                         </div>
                                     </div>
@@ -215,7 +179,7 @@
                         })}
                     </div>
 
-                    {modalOpen && <Modal item={itemEditando} onClose={()=>setModalOpen(false)} onSave={save} />}
+                    {modalOpen && <Modal item={itemEditando} faseAtual={fase} onClose={()=>setModalOpen(false)} onSave={save} />}
                 </div>
             );
         }
@@ -224,52 +188,49 @@
             let cls = `unit ${isHall ? 'hall-btn' : ''}`;
             if(data.status === 'ok') cls += ' ok';
             if(data.status === 'pendente') cls += ' pendente';
-            
             let content = label || id;
             if(!isHall && data.status === 'ok') content = <i className="ph-bold ph-check"></i>;
             if(!isHall && data.status === 'pendente') content = <i className="ph-bold ph-warning"></i>;
-
             return <div className={cls} onClick={onClick}>{content}</div>;
         }
 
-        function Modal({ item, onClose, onSave }) {
-            const [s, setS] = useState(item.status);
-            const [o, setO] = useState(item.obs || "");
+        function Modal({ item, faseAtual, onClose, onSave }) {
+            const [status, setStatus] = useState(item.status);
+            const [obs, setObs] = useState(item.obs || "");
+            const [equipe, setEquipe] = useState(item.equipe || ""); 
 
-            // Garante que o campo de texto apareça se já tiver obs, mesmo que o status esteja confuso
-            const showInput = s === 'pendente';
+            // Carrega as equipes da fase atual
+            const listaEquipes = EQUIPES_POR_FASE[faseAtual] || [];
 
             return (
                 <div className="modal-overlay" onClick={onClose}>
                     <div className="modal" onClick={e=>e.stopPropagation()}>
-                        <h3 className="modal-title">
-                            {String(item.id).includes('HALL') ? 'Vistoria Hall' : `Apto ${item.id}`}
-                        </h3>
-                        <p className="modal-subtitle">{String(item.id).includes('HALL') ? 'Área Comum' : 'Unidade Privativa'}</p>
+                        <h3 style={{marginTop:0, color:'var(--secondary)'}}>{String(item.id).includes('HALL')?'Hall':'Apto '+item.id}</h3>
                         
-                        <span className="label-section">MÃO DE OBRA</span>
+                        <span className="label-section">1. SELECIONE A EQUIPE</span>
+                        <select value={equipe} onChange={e=>setEquipe(e.target.value)} style={{marginBottom:15}}>
+                            <option value="">-- Selecione --</option>
+                            {listaEquipes.map(eq => <option key={eq} value={eq}>{eq}</option>)}
+                        </select>
+
+                        <span className="label-section">2. AVALIAÇÃO</span>
                         <div className="btn-group">
-                            <div className={`btn-opt ${s==='ok'?'sel-ok':''}`} onClick={()=>setS('ok')}>
+                            <div className={`btn-opt ${status==='ok'?'sel-ok':''}`} onClick={()=>setStatus('ok')}>
                                 <i className="ph-bold ph-thumbs-up"></i> Aprovado
                             </div>
-                            <div className={`btn-opt ${s==='pendente'?'sel-err':''}`} onClick={()=>setS('pendente')}>
+                            <div className={`btn-opt ${status==='pendente'?'sel-err':''}`} onClick={()=>setStatus('pendente')}>
                                 <i className="ph-bold ph-warning-circle"></i> Pendente
                             </div>
                         </div>
 
-                        {showInput && (
-                            <div style={{animation: 'popIn 0.3s'}}>
-                                <span className="label-section" style={{color: 'var(--danger)'}}>O QUE PRECISA AJUSTAR?</span>
-                                <textarea 
-                                    autoFocus 
-                                    placeholder="Ex: Pintura manchada, cerâmica oca..." 
-                                    value={o} 
-                                    onChange={e=>setO(e.target.value)}
-                                ></textarea>
+                        {status === 'pendente' && (
+                            <div style={{animation:'slideUp 0.2s'}}>
+                                <span className="label-section" style={{color:'var(--danger)'}}>O QUE ESTÁ ERRADO?</span>
+                                <textarea autoFocus placeholder="Descreva a falha..." value={obs} onChange={e=>setObs(e.target.value)}></textarea>
                             </div>
                         )}
                         
-                        <button className="btn-save" onClick={()=>onSave(s, o)}>SALVAR VISTORIA</button>
+                        <button className="btn-save" onClick={()=>onSave(status, obs, equipe)}>SALVAR DADOS</button>
                     </div>
                 </div>
             )
