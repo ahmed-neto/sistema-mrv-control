@@ -22,7 +22,7 @@
         .control-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 10px; margin-top: 15px; }
         select, input[type="date"] { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F9FAFB; font-weight: 600; color: var(--secondary); font-size: 0.9rem; appearance: none; box-sizing: border-box; }
 
-        /* TELHADO / COBERTURA */
+        /* TELHADO */
         .roof-card { background: #374151; color: white; padding: 15px; border-radius: 12px 12px 4px 4px; margin-bottom: 10px; text-align: center; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 2px solid transparent; transition: 0.2s; }
         .roof-card.ok { background: var(--success); border-color: var(--success); }
         .roof-card.pendente { background: var(--danger); animation: pulse 2s infinite; }
@@ -41,7 +41,7 @@
         .unit.pendente { background: var(--danger); color: white; animation: pulse 2s infinite; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
 
-        /* MODAL */
+        /* MODAL PADRÃO */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 100; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
         .modal { background: white; width: 90%; max-width: 380px; padding: 24px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); max-height: 90vh; overflow-y: auto; }
         @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -54,11 +54,12 @@
         textarea { width: 100%; padding: 12px; border: 1px solid #D1D5DB; border-radius: 8px; height: 70px; font-family: inherit; margin-bottom: 10px; box-sizing: border-box; resize: none; }
         .btn-save { width: 100%; padding: 16px; background: var(--secondary); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; margin-top: 10px; font-size: 1rem; }
 
-        /* RELATÓRIO */
+        /* RELATÓRIO E MEDIÇÃO */
         .btn-report { background: #E0E7FF; color: #3730A3; border: none; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 8px; margin-top: 15px; width: 100%; justify-content: center; transition: 0.2s; }
-        .prod-card { background: #F3F4F6; padding: 15px; border-radius: 10px; text-align: center; border: 1px solid #E5E7EB; margin-top: 15px; }
-        .prod-val { font-size: 2.5rem; font-weight: 800; color: var(--primary); display: block; line-height: 1; }
-        .prod-sub { font-size: 0.9rem; color: #6B7280; margin-top: 5px; display: block; font-weight: 600; }
+        .team-card { background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px; margin-bottom: 10px; }
+        .team-header { display: flex; justify-content: space-between; font-weight: 700; color: var(--secondary); margin-bottom: 5px; }
+        .team-count { color: var(--success); background: #ECFDF5; padding: 2px 8px; border-radius: 4px; font-size: 0.85rem; }
+        .team-units { font-size: 0.75rem; color: #6B7280; line-height: 1.4; word-break: break-all; }
         
         .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #1F2937; color: white; padding: 12px 24px; border-radius: 30px; font-size: 0.9rem; font-weight: 600; z-index: 200; display: flex; align-items: center; gap: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
     </style>
@@ -96,6 +97,7 @@
             const [itemEditando, setItemEditando] = useState(null);
             const [toast, setToast] = useState(null);
 
+            // Carrega dados da Torre/Fase
             useEffect(() => {
                 async function load() {
                     setDados({});
@@ -107,53 +109,38 @@
                 load();
             }, [torre, fase]);
 
-            // --- REGRAS DE VISIBILIDADE ---
+            // Regras de Alvenaria
             const isAlvenaria = fase === "ALVENARIA BLOCO";
-
-            // Verifica se a unidade deve aparecer na tela
             const shouldShow = (num) => {
-                if(!isAlvenaria) return true; // Se não for Alvenaria, mostra tudo
-                // Se for Alvenaria, só mostra finais 3, 4, 5, 6
+                if(!isAlvenaria) return true;
                 const final = num % 10;
                 return [3, 4, 5, 6].includes(final);
             };
-
-            // Cálculo do Escopo Total para Porcentagem
-            const calcularEscopoTotal = () => {
-                if (isAlvenaria) {
-                    // 4 aptos por andar * 8 andares + 1 Cobertura
-                    return (4 * 8) + 1; 
-                }
-                // Padrão: 8 aptos * 8 andares + 8 halls
-                return (8 * 8) + 8;
-            };
+            const calcularEscopoTotal = () => isAlvenaria ? (4 * 8) + 1 : (8 * 8) + 8;
 
             const save = async (status, obs, equipe) => {
                 const idUnidade = itemEditando.id.toString();
                 const idUnico = `${torre}_${fase}_${idUnidade}`.trim();
                 const obsFinal = status === 'ok' ? '' : obs; 
 
-    // --- TRUQUE DE MANAUS ---
-    // Pega a data de agora e subtrai 4 horas (ajuste manual para garantir)
-    // Se estivesse em SP seria -3, mas Manaus é -4.
+                // --- FUSO HORÁRIO MANAUS (UTC-4) ---
                 const agora = new Date();
+                // Subtrai 4 horas manualmente para garantir que grave no dia certo
                 const dataManaus = new Date(agora.getTime() - (4 * 60 * 60 * 1000));
-    // ------------------------
 
                 setDados(prev => ({
                     ...prev, 
                     [idUnidade]: { ...prev[idUnidade], status, obs: obsFinal, equipe }
                 }));
-    
+                
                 setModalOpen(false);
                 setToast("Salvo com sucesso!");
                 setTimeout(()=>setToast(null), 2500);
 
                 const { error } = await supabase.from('vistorias').upsert({
-                    id: idUnico, 
-                    torre, fase, unidade: idUnidade,
+                    id: idUnico, torre, fase, unidade: idUnidade,
                     status, obs: obsFinal, equipe, 
-                    updated_at: dataManaus // <--- AQUI USAMOS A DATA DE MANAUS
+                    updated_at: dataManaus // Usa a data ajustada
                 }, { onConflict: 'id' });
 
                 if (error) { console.error(error); setToast("Erro ao salvar!"); }
@@ -168,15 +155,11 @@
 
             // Progresso Visual
             const totalScope = calcularEscopoTotal();
-            // Filtra o doneCount baseado nas mesmas regras de visibilidade
             const doneCount = Object.keys(dados).filter(key => {
                 const item = dados[key];
                 if(item.status !== 'ok') return false;
-                
-                // Validação de Escopo no Count
                 if(key === "COBERTURA") return isAlvenaria; 
                 if(String(key).includes("HALL")) return !isAlvenaria;
-                
                 const num = parseInt(key);
                 if(!isNaN(num)) return shouldShow(num);
                 return false;
@@ -197,12 +180,12 @@
                         </div>
 
                         <button className="btn-report" onClick={()=>setReportOpen(true)}>
-                            <i className="ph-bold ph-calendar-check"></i> Relatório de Produção
+                            <i className="ph-bold ph-clipboard-text"></i> Relatório de Medição
                         </button>
 
                         <div style={{marginTop:15}}>
                             <div style={{display:'flex', justifyContent:'space-between', marginBottom:5, fontSize:'0.7rem', fontWeight:'bold', color:'#666'}}>
-                                <span>AVANÇO FÍSICO ({fase === 'ALVENARIA BLOCO' ? 'Reduzido' : 'Total'})</span> <span>{progresso}%</span>
+                                <span>AVANÇO FÍSICO</span> <span>{progresso}%</span>
                             </div>
                             <div style={{height:8, background:'#E5E7EB', borderRadius:10, overflow:'hidden'}}>
                                 <div style={{width:`${progresso}%`, height:'100%', background:'var(--primary)', transition:'width 0.5s ease'}}></div>
@@ -210,7 +193,6 @@
                         </div>
                     </div>
 
-                    {/* COBERTURA (SÓ ALVENARIA) */}
                     {isAlvenaria && (
                         <div className={`roof-card ${getItem('COBERTURA').status}`} onClick={()=>handleUnitClick('COBERTURA')}>
                             <i className="ph-fill ph-house-line"></i> Cobertura / Telhado
@@ -220,8 +202,6 @@
                     <div className="building-card">
                         {Array.from({length: ANDARES}, (_, i) => {
                             const andar = ANDARES - i;
-                            
-                            // Define quais APs mostrar baseado na fase
                             const linhaCima = isAlvenaria ? [5, 6] : [5, 6, 7, 8];
                             const linhaBaixo = isAlvenaria ? [3, 4] : [1, 2, 3, 4];
 
@@ -229,8 +209,6 @@
                                 <div key={andar} className="floor-card">
                                     <div className="floor-badge">{andar}º PAV</div>
                                     <div className="floor-layout">
-                                        
-                                        {/* LINHA CIMA */}
                                         <div className="row-units">
                                             {linhaCima.map(n => {
                                                 const ap = (andar*100)+n;
@@ -238,14 +216,12 @@
                                             })}
                                         </div>
 
-                                        {/* HALL (SOME NA ALVENARIA) */}
                                         {!isAlvenaria && (
                                             <div className="row-hall">
                                                 <Unit id={`HALL-${andar}`} label="HALL" isHall={true} data={getItem(`HALL-${andar}`)} onClick={()=>handleUnitClick(`HALL-${andar}`)} />
                                             </div>
                                         )}
 
-                                        {/* LINHA BAIXO */}
                                         <div className="row-units">
                                             {linhaBaixo.map(n => {
                                                 const ap = (andar*100)+n;
@@ -260,12 +236,11 @@
 
                     {modalOpen && <ModalVistoria item={itemEditando} faseAtual={fase} onClose={()=>setModalOpen(false)} onSave={save} />}
                     
-                    {reportOpen && <ModalProducao 
+                    {reportOpen && <ModalMedicao 
                         onClose={()=>setReportOpen(false)} 
                         supabase={supabase} 
                         torreAtual={torre} 
                         faseAtual={fase}
-                        totalEscopo={totalScope}
                     />}
                 </div>
             );
@@ -281,33 +256,42 @@
             return <div className={cls} onClick={onClick}>{content}</div>;
         }
 
-        // --- RELATÓRIO DE PRODUÇÃO FÍSICA ---
-        function ModalProducao({ onClose, supabase, torreAtual, faseAtual, totalEscopo }) {
+        // --- RELATÓRIO DE MEDIÇÃO DETALHADA ---
+        function ModalMedicao({ onClose, supabase, torreAtual, faseAtual }) {
             const [dtInicio, setDtInicio] = useState('');
             const [dtFim, setDtFim] = useState('');
             const [loading, setLoading] = useState(false);
-            const [stats, setStats] = useState(null);
+            const [medicao, setMedicao] = useState(null);
 
             const gerar = async () => {
                 if(!dtInicio || !dtFim) return alert("Selecione as datas!");
                 setLoading(true);
                 
-                // Busca APENAS o que foi produzido (OK) na Torre e Fase atuais no período
-                const { data, count, error } = await supabase
+                // Busca o que foi feito (OK) no período
+                const { data, error } = await supabase
                     .from('vistorias')
-                    .select('*', { count: 'exact' })
+                    .select('*')
                     .eq('torre', torreAtual)
                     .eq('fase', faseAtual)
-                    .eq('status', 'ok') // Só conta o que foi APROVADO
+                    .eq('status', 'ok')
                     .gte('updated_at', dtInicio + 'T00:00:00')
                     .lte('updated_at', dtFim + 'T23:59:59');
 
                 if(data) {
-                    // Calculando porcentagem produzida no período
-                    const produced = count || 0;
-                    const percent = totalEscopo > 0 ? Math.round((produced / totalEscopo) * 100) : 0;
+                    // Agrupa por equipe
+                    const porEquipe = {};
+                    data.forEach(item => {
+                        const eq = item.equipe || "SEM EQUIPE";
+                        if(!porEquipe[eq]) porEquipe[eq] = [];
+                        porEquipe[eq].push(item.unidade);
+                    });
                     
-                    setStats({ produced, percent });
+                    // Ordena os apartamentos (ex: 101, 102...) para ficar bonito
+                    Object.keys(porEquipe).forEach(eq => {
+                        porEquipe[eq].sort();
+                    });
+
+                    setMedicao({ total: data.length, detalhes: porEquipe });
                 }
                 setLoading(false);
             };
@@ -315,7 +299,7 @@
             return (
                 <div className="modal-overlay" onClick={onClose}>
                     <div className="modal" onClick={e=>e.stopPropagation()}>
-                        <h3 style={{marginTop:0, color:'var(--secondary)'}}>Produção: {torreAtual}</h3>
+                        <h3 style={{marginTop:0, color:'var(--secondary)'}}>Medição: {torreAtual}</h3>
                         <p style={{fontSize:'0.85rem', color:'#666', marginBottom:20}}>Fase: <strong>{faseAtual}</strong></p>
                         
                         <div style={{display:'flex', gap:10, marginBottom:15}}>
@@ -330,22 +314,30 @@
                         </div>
 
                         <button className="btn-save" onClick={gerar} disabled={loading} style={{background: loading ? '#ccc' : 'var(--primary)'}}>
-                            {loading ? 'BUSCANDO...' : 'CALCULAR PRODUÇÃO'}
+                            {loading ? 'CALCULANDO...' : 'GERAR MEDIÇÃO'}
                         </button>
 
-                        {stats && (
-                            <div style={{animation:'slideUp 0.3s'}}>
-                                <div className="prod-card">
-                                    <span className="prod-val">{stats.produced}</span>
-                                    <span className="prod-sub">UNIDADES APROVADAS</span>
+                        {medicao && (
+                            <div style={{marginTop:20, animation:'slideUp 0.3s'}}>
+                                <div style={{textAlign:'center', marginBottom:15}}>
+                                    <span style={{fontSize:'2rem', fontWeight:'800', color:'var(--primary)'}}>{medicao.total}</span>
+                                    <span style={{display:'block', fontSize:'0.75rem', fontWeight:'bold', color:'#666'}}>TOTAL PRODUZIDO</span>
                                 </div>
-                                <div className="prod-card" style={{marginTop:10, borderColor:'var(--primary)', background:'#ECFDF5'}}>
-                                    <span className="prod-val" style={{color:'var(--success)'}}>{stats.percent}%</span>
-                                    <span className="prod-sub">DA TORRE NESTE PERÍODO</span>
-                                </div>
-                                <p style={{textAlign:'center', fontSize:'0.8rem', color:'#999', marginTop:15}}>
-                                    Base de cálculo: {totalEscopo} unidades totais previstos para esta fase.
-                                </p>
+
+                                <span className="label-section">DETALHAMENTO POR EQUIPE</span>
+                                {Object.keys(medicao.detalhes).length === 0 && <p style={{fontSize:'0.8rem', color:'#999', textAlign:'center'}}>Nenhuma produção encontrada.</p>}
+                                
+                                {Object.keys(medicao.detalhes).map(eq => (
+                                    <div key={eq} className="team-card">
+                                        <div className="team-header">
+                                            <span>{eq}</span>
+                                            <span className="team-count">{medicao.detalhes[eq].length} UN</span>
+                                        </div>
+                                        <div className="team-units">
+                                            {medicao.detalhes[eq].join(', ')}
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         )}
                         
