@@ -133,18 +133,27 @@
                 const idUnico = `${torre}_${fase}_${idUnidade}`.trim();
                 const obsFinal = status === 'ok' ? '' : obs; 
 
+    // --- TRUQUE DE MANAUS ---
+    // Pega a data de agora e subtrai 4 horas (ajuste manual para garantir)
+    // Se estivesse em SP seria -3, mas Manaus é -4.
+                const agora = new Date();
+                const dataManaus = new Date(agora.getTime() - (4 * 60 * 60 * 1000));
+    // ------------------------
+
                 setDados(prev => ({
                     ...prev, 
                     [idUnidade]: { ...prev[idUnidade], status, obs: obsFinal, equipe }
                 }));
-                
+    
                 setModalOpen(false);
                 setToast("Salvo com sucesso!");
                 setTimeout(()=>setToast(null), 2500);
 
                 const { error } = await supabase.from('vistorias').upsert({
-                    id: idUnico, torre, fase, unidade: idUnidade,
-                    status, obs: obsFinal, equipe, updated_at: new Date()
+                    id: idUnico, 
+                    torre, fase, unidade: idUnidade,
+                    status, obs: obsFinal, equipe, 
+                    updated_at: dataManaus // <--- AQUI USAMOS A DATA DE MANAUS
                 }, { onConflict: 'id' });
 
                 if (error) { console.error(error); setToast("Erro ao salvar!"); }
