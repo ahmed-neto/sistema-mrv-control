@@ -20,7 +20,7 @@
 
         .dashboard-header { background: var(--surface); padding: 20px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; border-top: 4px solid var(--primary); }
         .control-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 10px; margin-top: 15px; }
-        select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F9FAFB; font-weight: 600; color: var(--secondary); font-size: 0.9rem; appearance: none; }
+        select, input[type="date"] { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F9FAFB; font-weight: 600; color: var(--secondary); font-size: 0.9rem; appearance: none; box-sizing: border-box; }
 
         .floor-card { background: var(--surface); border-radius: 12px; padding: 15px; padding-top: 40px; box-shadow: 0 2px 4px rgba(0,0,0,0.03); position: relative; margin-bottom: 15px; }
         .floor-badge { position: absolute; top: 10px; left: 10px; background: var(--secondary); color: white; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 6px; }
@@ -37,7 +37,7 @@
 
         /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 100; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
-        .modal { background: white; width: 90%; max-width: 380px; padding: 24px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .modal { background: white; width: 90%; max-width: 380px; padding: 24px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); max-height: 90vh; overflow-y: auto; }
         @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
         .label-section { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #9CA3AF; margin-bottom: 6px; display: block; margin-top: 15px; }
@@ -50,6 +50,15 @@
         textarea { width: 100%; padding: 12px; border: 1px solid #D1D5DB; border-radius: 8px; height: 70px; font-family: inherit; margin-bottom: 10px; box-sizing: border-box; resize: none; }
         .btn-save { width: 100%; padding: 16px; background: var(--secondary); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; margin-top: 10px; font-size: 1rem; }
 
+        /* RELATÓRIO STYLE */
+        .btn-report { background: #E0E7FF; color: #3730A3; border: none; padding: 8px 16px; border-radius: 20px; font-weight: 600; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 5px; margin-top: 10px; width: 100%; justify-content: center; }
+        .report-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.85rem; }
+        .report-table th { text-align: left; color: #6B7280; font-weight: 700; padding-bottom: 8px; border-bottom: 2px solid #E5E7EB; }
+        .report-table td { padding: 10px 0; border-bottom: 1px solid #F3F4F6; color: var(--secondary); }
+        .metric-box { background: #F9FAFB; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #E5E7EB; }
+        .metric-val { font-size: 1.2rem; font-weight: 800; color: var(--secondary); display: block; }
+        .metric-lbl { font-size: 0.7rem; color: #6B7280; font-weight: 700; text-transform: uppercase; }
+
         .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #1F2937; color: white; padding: 12px 24px; border-radius: 30px; font-size: 0.9rem; font-weight: 600; z-index: 200; display: flex; align-items: center; gap: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
     </style>
 </head>
@@ -60,7 +69,6 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // CONEXÃO SUPABASE
         const SUPABASE_URL = 'https://iisvzfzcpxxgkasmteft.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlpc3Z6ZnpjcHh4Z2thc210ZWZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzNzcyOTgsImV4cCI6MjA3OTk1MzI5OH0.HxkLQxXb8yohwP9nK6IfxGzxH1ItlMwmXpHVZb6qlGo';
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -81,10 +89,15 @@
             const [torre, setTorre] = useState(TORRES[0]);
             const [fase, setFase] = useState(FASES[0]);
             const [dados, setDados] = useState({});
+            
+            // MODAIS
             const [modalOpen, setModalOpen] = useState(false);
+            const [reportOpen, setReportOpen] = useState(false); // Novo Modal de Relatório
+            
             const [itemEditando, setItemEditando] = useState(null);
             const [toast, setToast] = useState(null);
 
+            // Carrega dados da Torre/Fase atual
             useEffect(() => {
                 async function load() {
                     setDados({});
@@ -96,18 +109,12 @@
                 load();
             }, [torre, fase]);
 
+            // Salva Vistoria
             const save = async (status, obs, equipe) => {
-                // CORREÇÃO CRÍTICA AQUI:
-                // Garantimos que estamos pegando apenas o ID CURTO (ex: "405" ou "HALL-1")
-                // Se itemEditando.id vier sujo, o código abaixo limparia, mas a correção real está no onClick
-                const idUnidade = itemEditando.id.toString(); 
-                
-                // Monta o ID único corretamente: Torre_Fase_405
+                const idUnidade = itemEditando.id.toString();
                 const idUnico = `${torre}_${fase}_${idUnidade}`.trim();
-                
                 const obsFinal = status === 'ok' ? '' : obs; 
 
-                // Atualiza tela
                 setDados(prev => ({
                     ...prev, 
                     [idUnidade]: { ...prev[idUnidade], status, obs: obsFinal, equipe }
@@ -117,16 +124,9 @@
                 setToast("Salvo com sucesso!");
                 setTimeout(()=>setToast(null), 2500);
 
-                // Salva no banco
                 const { error } = await supabase.from('vistorias').upsert({
-                    id: idUnico, 
-                    torre, 
-                    fase, 
-                    unidade: idUnidade, // Salva "405" puro na coluna unidade
-                    status, 
-                    obs: obsFinal, 
-                    equipe, 
-                    updated_at: new Date()
+                    id: idUnico, torre, fase, unidade: idUnidade,
+                    status, obs: obsFinal, equipe, updated_at: new Date()
                 }, { onConflict: 'id' });
 
                 if (error) { console.error(error); setToast("Erro ao salvar!"); }
@@ -134,9 +134,7 @@
 
             const getItem = (id) => dados[id] || {status: null, obs: '', equipe: ''};
             
-            // Lógica do Clique (AQUI ESTAVA O PROBLEMA ANTERIOR)
-            // Agora usamos: { ...getItem(ap), id: ap }
-            // Isso garante que o 'id' seja sempre o número puro (ap), e não o id longo do banco
+            // Lógica do Clique
             const handleUnitClick = (ap) => {
                 setItemEditando({ ...getItem(ap), id: ap });
                 setModalOpen(true);
@@ -152,13 +150,20 @@
 
                     <div className="dashboard-header">
                         <h1 style={{margin:0, color:'var(--secondary)'}}>MRV Gestão</h1>
+                        
                         <div className="control-grid">
                             <select value={torre} onChange={e=>setTorre(e.target.value)}>{TORRES.map(t=><option key={t}>{t}</option>)}</select>
                             <select value={fase} onChange={e=>setFase(e.target.value)}>{FASES.map(f=><option key={f}>{f}</option>)}</select>
                         </div>
+
+                        {/* BOTÃO DE RELATÓRIO NOVO */}
+                        <button className="btn-report" onClick={()=>setReportOpen(true)}>
+                            <i className="ph-bold ph-chart-bar"></i> Gerar Relatório de Equipes
+                        </button>
+
                         <div style={{marginTop:15}}>
                             <div style={{display:'flex', justifyContent:'space-between', marginBottom:5, fontSize:'0.7rem', fontWeight:'bold', color:'#666'}}>
-                                <span>CONCLUSÃO</span> <span>{progresso}%</span>
+                                <span>CONCLUSÃO TORRE</span> <span>{progresso}%</span>
                             </div>
                             <div style={{height:8, background:'#E5E7EB', borderRadius:10, overflow:'hidden'}}>
                                 <div style={{width:`${progresso}%`, height:'100%', background:'var(--primary)', transition:'width 0.5s ease'}}></div>
@@ -194,7 +199,9 @@
                         })}
                     </div>
 
-                    {modalOpen && <Modal item={itemEditando} faseAtual={fase} onClose={()=>setModalOpen(false)} onSave={save} />}
+                    {modalOpen && <ModalVistoria item={itemEditando} faseAtual={fase} onClose={()=>setModalOpen(false)} onSave={save} />}
+                    
+                    {reportOpen && <ModalRelatorio onClose={()=>setReportOpen(false)} supabase={supabase} />}
                 </div>
             );
         }
@@ -209,7 +216,97 @@
             return <div className={cls} onClick={onClick}>{content}</div>;
         }
 
-        function Modal({ item, faseAtual, onClose, onSave }) {
+        // --- NOVO MODAL DE RELATÓRIO ---
+        function ModalRelatorio({ onClose, supabase }) {
+            const [dtInicio, setDtInicio] = useState('');
+            const [dtFim, setDtFim] = useState('');
+            const [loading, setLoading] = useState(false);
+            const [resultado, setResultado] = useState(null);
+
+            const gerar = async () => {
+                if(!dtInicio || !dtFim) return alert("Selecione as datas!");
+                setLoading(true);
+                
+                // Busca TUDO no período (independente de torre)
+                const { data, error } = await supabase
+                    .from('vistorias')
+                    .select('*')
+                    .gte('updated_at', dtInicio + 'T00:00:00')
+                    .lte('updated_at', dtFim + 'T23:59:59');
+
+                if(data) {
+                    const stats = {};
+                    data.forEach(item => {
+                        const eq = item.equipe || "SEM EQUIPE";
+                        if(!stats[eq]) stats[eq] = { total: 0, ok: 0, pendente: 0 };
+                        
+                        stats[eq].total++;
+                        if(item.status === 'ok') stats[eq].ok++;
+                        if(item.status === 'pendente') stats[eq].pendente++;
+                    });
+                    setResultado(stats);
+                }
+                setLoading(false);
+            };
+
+            return (
+                <div className="modal-overlay" onClick={onClose}>
+                    <div className="modal" onClick={e=>e.stopPropagation()}>
+                        <h3 style={{marginTop:0, color:'var(--secondary)'}}>Relatório de Produtividade</h3>
+                        
+                        <div style={{display:'flex', gap:10, marginBottom:15}}>
+                            <div style={{flex:1}}>
+                                <span className="label-section" style={{marginTop:0}}>DE</span>
+                                <input type="date" value={dtInicio} onChange={e=>setDtInicio(e.target.value)} />
+                            </div>
+                            <div style={{flex:1}}>
+                                <span className="label-section" style={{marginTop:0}}>ATÉ</span>
+                                <input type="date" value={dtFim} onChange={e=>setDtFim(e.target.value)} />
+                            </div>
+                        </div>
+
+                        <button className="btn-save" onClick={gerar} disabled={loading} style={{background: loading ? '#ccc' : 'var(--primary)'}}>
+                            {loading ? 'CALCULANDO...' : 'GERAR RELATÓRIO'}
+                        </button>
+
+                        {resultado && (
+                            <div style={{marginTop:20}}>
+                                <span className="label-section">RESULTADO POR EQUIPE</span>
+                                <table className="report-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Equipe</th>
+                                            <th style={{textAlign:'center'}}>OK</th>
+                                            <th style={{textAlign:'center'}}>PEND</th>
+                                            <th style={{textAlign:'right'}}>% Aprov</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {Object.keys(resultado).map(eq => {
+                                            const r = resultado[eq];
+                                            const perc = Math.round((r.ok / r.total) * 100);
+                                            return (
+                                                <tr key={eq}>
+                                                    <td>{eq}</td>
+                                                    <td style={{textAlign:'center', fontWeight:'bold', color:'var(--success)'}}>{r.ok}</td>
+                                                    <td style={{textAlign:'center', fontWeight:'bold', color:'var(--danger)'}}>{r.pendente}</td>
+                                                    <td style={{textAlign:'right', fontWeight:'800'}}>{perc}%</td>
+                                                </tr>
+                                            )
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                        
+                        <button onClick={onClose} style={{background:'transparent', border:'none', color:'#666', width:'100%', padding:15, marginTop:10, cursor:'pointer'}}>Fechar</button>
+                    </div>
+                </div>
+            )
+        }
+
+        // --- MODAL DE VISTORIA (ANTIGO) ---
+        function ModalVistoria({ item, faseAtual, onClose, onSave }) {
             const [status, setStatus] = useState(item.status);
             const [obs, setObs] = useState(item.obs || "");
             const [equipe, setEquipe] = useState(item.equipe || ""); 
@@ -255,4 +352,3 @@
     </script>
 </body>
 </html>
-
