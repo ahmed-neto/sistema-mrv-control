@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MRV Gestão</title>
+    <title>MRV Acabamentos</title>
     
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -20,12 +20,7 @@
 
         .dashboard-header { background: var(--surface); padding: 20px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; border-top: 4px solid var(--primary); }
         .control-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 10px; margin-top: 15px; }
-        select, input[type="date"] { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F9FAFB; font-weight: 600; color: var(--secondary); font-size: 0.9rem; appearance: none; box-sizing: border-box; }
-
-        /* TELHADO */
-        .roof-card { background: #374151; color: white; padding: 15px; border-radius: 12px 12px 4px 4px; margin-bottom: 10px; text-align: center; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 2px solid transparent; transition: 0.2s; }
-        .roof-card.ok { background: var(--success); border-color: var(--success); }
-        .roof-card.pendente { background: var(--danger); animation: pulse 2s infinite; }
+        select, input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #E5E7EB; background: #F9FAFB; font-weight: 600; color: var(--secondary); font-size: 0.9rem; box-sizing: border-box; }
 
         .floor-card { background: var(--surface); border-radius: 12px; padding: 15px; padding-top: 40px; box-shadow: 0 2px 4px rgba(0,0,0,0.03); position: relative; margin-bottom: 15px; }
         .floor-badge { position: absolute; top: 10px; left: 10px; background: var(--secondary); color: white; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 6px; }
@@ -39,7 +34,6 @@
 
         .unit.ok { background: var(--success); color: white; }
         .unit.pendente { background: var(--danger); color: white; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
 
         /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 100; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
@@ -51,25 +45,15 @@
         .btn-opt { flex: 1; padding: 14px; border-radius: 10px; border: 2px solid #F3F4F6; background: white; font-weight: 600; cursor: pointer; text-align: center; color: var(--text); display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
         .btn-opt.sel-ok { background: var(--success); color: white; border-color: var(--success); }
         .btn-opt.sel-err { background: var(--danger); color: white; border-color: var(--danger); }
-        textarea { width: 100%; padding: 12px; border: 1px solid #D1D5DB; border-radius: 8px; height: 70px; font-family: inherit; margin-bottom: 10px; box-sizing: border-box; resize: none; }
-        .btn-save { width: 100%; padding: 16px; background: var(--secondary); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; margin-top: 10px; font-size: 1rem; }
-
-        /* ESTILOS DE RELATÓRIO E MENU */
+        
+        .btn-save { width: 100%; padding: 16px; background: var(--secondary); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; margin-top: 20px; font-size: 1rem; }
         .btn-report { background: #E0E7FF; color: #3730A3; border: none; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 8px; margin-top: 15px; width: 100%; justify-content: center; transition: 0.2s; }
-        
-        .menu-btn { width: 100%; padding: 20px; border-radius: 12px; border: 1px solid #E5E7EB; background: #F9FAFB; font-weight: 700; font-size: 1rem; color: var(--secondary); cursor: pointer; display: flex; align-items: center; gap: 15px; margin-bottom: 10px; text-align: left; transition: 0.2s; }
-        .menu-btn:hover { background: #EEF2FF; border-color: #3730A3; color: #3730A3; }
-        .menu-icon { font-size: 1.5rem; color: #6B7280; }
 
-        /* Cards de Resultado */
-        .prod-card { background: #ECFDF5; padding: 15px; border-radius: 10px; text-align: center; border: 1px solid var(--success); margin-top: 15px; }
-        .prod-val { font-size: 2.5rem; font-weight: 800; color: var(--success); display: block; line-height: 1; }
-        .prod-sub { font-size: 0.9rem; color: #065F46; margin-top: 5px; display: block; font-weight: 600; }
-        
-        .team-card { background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px; margin-bottom: 10px; }
-        .team-header { display: flex; justify-content: space-between; font-weight: 700; color: var(--secondary); margin-bottom: 5px; }
-        .team-count { color: var(--success); background: #ECFDF5; padding: 2px 8px; border-radius: 4px; font-size: 0.85rem; }
-        .team-units { font-size: 0.75rem; color: #6B7280; line-height: 1.4; word-break: break-all; }
+        /* TABELA RELATÓRIO */
+        .report-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.8rem; }
+        .report-table th { text-align: left; padding: 8px; border-bottom: 2px solid #ddd; color: #666; }
+        .report-table td { padding: 8px; border-bottom: 1px solid #eee; }
+        .metric-highlight { color: var(--primary); font-weight: 800; }
 
         .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #1F2937; color: white; padding: 12px 24px; border-radius: 30px; font-size: 0.9rem; font-weight: 600; z-index: 200; display: flex; align-items: center; gap: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
     </style>
@@ -86,15 +70,23 @@
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const TORRES = ["Torre 5", "Torre 2", "Torre 3", "Torre 4"];
-        const FASES = ["POS FORMA", "ESQUADRIAS", "IMPERMEABILIZAÇÃO", "ALVENARIA BLOCO", "FECHAMENTO SHAFT"];
+        
+        // NOVOS SERVIÇOS
+        const FASES = [
+            "1. PISO / AZULEJO",
+            "2. REJUNTE + PROTEÇÃO",
+            "3. PINTURA",
+            "4. BANCADA"
+        ];
+        
         const ANDARES = 8;
 
+        // NOVAS EQUIPES
         const EQUIPES_POR_FASE = {
-            "POS FORMA": ["LD", "MOP", "VITHAL"],
-            "ESQUADRIAS": ["MOP AURIAN", "MOP HELDE"],
-            "IMPERMEABILIZAÇÃO": ["LD BRIAGE"],
-            "ALVENARIA BLOCO": ["LD"],
-            "FECHAMENTO SHAFT": ["LW", "TOP LIMPE"]
+            "1. PISO / AZULEJO": ["VITHAL", "TRENAX", "MB ENG", "REE", "DS ENG", "JB ENG", "L. OLIVEIRA", "MRV ROBSON", "MRV EDIVANEI", "CICLO"],
+            "2. REJUNTE + PROTEÇÃO": ["BMR", "MRV ADRIANA", "MRV LUCIANA", "MH"],
+            "3. PINTURA": ["MH", "ALPHAPONTE", "REE", "VITHAL"],
+            "4. BANCADA": ["KM"]
         };
 
         function App() {
@@ -102,16 +94,12 @@
             const [fase, setFase] = useState(FASES[0]);
             const [dados, setDados] = useState({});
             
-            // ESTADOS DE MODAIS
             const [modalVistoriaOpen, setModalVistoriaOpen] = useState(false);
-            const [menuRelatorioOpen, setMenuRelatorioOpen] = useState(false); // O Menu Principal
-            const [modalProducaoOpen, setModalProducaoOpen] = useState(false); // O de % (V5)
-            const [modalMedicaoOpen, setModalMedicaoOpen] = useState(false); // O de Equipe (V6)
-            
+            const [reportOpen, setReportOpen] = useState(false);
             const [itemEditando, setItemEditando] = useState(null);
             const [toast, setToast] = useState(null);
 
-            // Carrega dados da Torre/Fase
+            // Carrega dados
             useEffect(() => {
                 async function load() {
                     setDados({});
@@ -123,60 +111,55 @@
                 load();
             }, [torre, fase]);
 
-            // Regras de Alvenaria
-            const isAlvenaria = fase === "ALVENARIA BLOCO";
-            const shouldShow = (num) => {
-                if(!isAlvenaria) return true;
-                const final = num % 10;
-                return [3, 4, 5, 6].includes(final);
-            };
-            const calcularEscopoTotal = () => isAlvenaria ? (4 * 8) + 1 : (8 * 8) + 8;
-
-            const save = async (status, obs, equipe) => {
+            // Salva dados completos
+            const save = async (formData) => {
                 const idUnidade = itemEditando.id.toString();
                 const idUnico = `${torre}_${fase}_${idUnidade}`.trim();
-                const obsFinal = status === 'ok' ? '' : obs; 
+                const obsFinal = formData.status === 'ok' ? '' : formData.obs; 
 
-                // Fuso Manaus (-4h)
+                // Ajuste Fuso Manaus (-4h)
                 const agora = new Date();
                 const dataManaus = new Date(agora.getTime() - (4 * 60 * 60 * 1000));
 
-                setDados(prev => ({
-                    ...prev, 
-                    [idUnidade]: { ...prev[idUnidade], status, obs: obsFinal, equipe }
-                }));
-                
+                const newData = { 
+                    ...dados[idUnidade], 
+                    status: formData.status, 
+                    obs: obsFinal, 
+                    equipe: formData.equipe,
+                    funcionario: formData.funcionario,
+                    data_inicio: formData.dataInicio,
+                    data_fim: formData.dataFim
+                };
+
+                setDados(prev => ({ ...prev, [idUnidade]: newData }));
                 setModalVistoriaOpen(false);
-                setToast("Salvo com sucesso!");
+                setToast("Salvo!");
                 setTimeout(()=>setToast(null), 2500);
 
                 const { error } = await supabase.from('vistorias').upsert({
                     id: idUnico, torre, fase, unidade: idUnidade,
-                    status, obs: obsFinal, equipe, 
+                    status: formData.status, 
+                    obs: obsFinal, 
+                    equipe: formData.equipe,
+                    funcionario: formData.funcionario,
+                    data_inicio: formData.dataInicio || null,
+                    data_fim: formData.dataFim || null,
                     updated_at: dataManaus 
                 }, { onConflict: 'id' });
 
                 if (error) { console.error(error); setToast("Erro ao salvar!"); }
             };
 
-            const getItem = (id) => dados[id] || {status: null, obs: '', equipe: ''};
+            const getItem = (id) => dados[id] || {status: null, obs: '', equipe: '', funcionario: '', data_inicio: '', data_fim: ''};
             
             const handleUnitClick = (ap) => {
                 setItemEditando({ ...getItem(ap), id: ap });
                 setModalVistoriaOpen(true);
             };
 
-            // Progresso Visual (Barra)
-            const totalScope = calcularEscopoTotal();
-            const doneCount = Object.keys(dados).filter(key => {
-                const item = dados[key];
-                if(item.status !== 'ok') return false;
-                if(key === "COBERTURA") return isAlvenaria; 
-                if(String(key).includes("HALL")) return !isAlvenaria;
-                const num = parseInt(key);
-                if(!isNaN(num)) return shouldShow(num);
-                return false;
-            }).length;
+            // Progresso Visual
+            const totalScope = (8 * 8) + 8; // 72 unidades (Aptos + Hall)
+            const doneCount = Object.values(dados).filter(d => d.status === 'ok').length;
             const progresso = Math.round((doneCount / totalScope) * 100) || 0;
 
             return (
@@ -184,21 +167,20 @@
                     {toast && <div className="toast"><i className="ph-fill ph-check-circle"></i> {toast}</div>}
 
                     <div className="dashboard-header">
-                        <h1 style={{margin:0, color:'var(--secondary)'}}>MRV Gestão</h1>
+                        <h1 style={{margin:0, color:'var(--secondary)'}}>MRV Acabamentos</h1>
                         
                         <div className="control-grid">
                             <select value={torre} onChange={e=>setTorre(e.target.value)}>{TORRES.map(t=><option key={t}>{t}</option>)}</select>
                             <select value={fase} onChange={e=>setFase(e.target.value)}>{FASES.map(f=><option key={f}>{f}</option>)}</select>
                         </div>
 
-                        {/* BOTÃO PRINCIPAL DE RELATÓRIOS */}
-                        <button className="btn-report" onClick={()=>setMenuRelatorioOpen(true)}>
-                            <i className="ph-bold ph-files"></i> MENU DE RELATÓRIOS
+                        <button className="btn-report" onClick={()=>setReportOpen(true)}>
+                            <i className="ph-bold ph-chart-pie-slice"></i> Relatório de Produtividade
                         </button>
 
                         <div style={{marginTop:15}}>
                             <div style={{display:'flex', justifyContent:'space-between', marginBottom:5, fontSize:'0.7rem', fontWeight:'bold', color:'#666'}}>
-                                <span>AVANÇO ({fase === 'ALVENARIA BLOCO' ? 'Reduzido' : 'Total'})</span> <span>{progresso}%</span>
+                                <span>AVANÇO TORRE</span> <span>{progresso}%</span>
                             </div>
                             <div style={{height:8, background:'#E5E7EB', borderRadius:10, overflow:'hidden'}}>
                                 <div style={{width:`${progresso}%`, height:'100%', background:'var(--primary)', transition:'width 0.5s ease'}}></div>
@@ -206,32 +188,21 @@
                         </div>
                     </div>
 
-                    {isAlvenaria && (
-                        <div className={`roof-card ${getItem('COBERTURA').status}`} onClick={()=>handleUnitClick('COBERTURA')}>
-                            <i className="ph-fill ph-house-line"></i> Cobertura / Telhado
-                        </div>
-                    )}
-
                     <div className="building-card">
                         {Array.from({length: ANDARES}, (_, i) => {
                             const andar = ANDARES - i;
-                            const linhaCima = isAlvenaria ? [5, 6] : [5, 6, 7, 8];
-                            const linhaBaixo = isAlvenaria ? [3, 4] : [1, 2, 3, 4];
-
                             return (
                                 <div key={andar} className="floor-card">
                                     <div className="floor-badge">{andar}º PAV</div>
                                     <div className="floor-layout">
                                         <div className="row-units">
-                                            {linhaCima.map(n => { const ap = (andar*100)+n; return <Unit key={ap} id={ap} data={getItem(ap)} onClick={()=>handleUnitClick(ap)} /> })}
+                                            {[5,6,7,8].map(n => { const ap = (andar*100)+n; return <Unit key={ap} id={ap} data={getItem(ap)} onClick={()=>handleUnitClick(ap)} /> })}
                                         </div>
-                                        {!isAlvenaria && (
-                                            <div className="row-hall">
-                                                <Unit id={`HALL-${andar}`} label="HALL" isHall={true} data={getItem(`HALL-${andar}`)} onClick={()=>handleUnitClick(`HALL-${andar}`)} />
-                                            </div>
-                                        )}
+                                        <div className="row-hall">
+                                            <Unit id={`HALL-${andar}`} label="HALL" isHall={true} data={getItem(`HALL-${andar}`)} onClick={()=>handleUnitClick(`HALL-${andar}`)} />
+                                        </div>
                                         <div className="row-units">
-                                            {linhaBaixo.map(n => { const ap = (andar*100)+n; return <Unit key={ap} id={ap} data={getItem(ap)} onClick={()=>handleUnitClick(ap)} /> })}
+                                            {[1,2,3,4].map(n => { const ap = (andar*100)+n; return <Unit key={ap} id={ap} data={getItem(ap)} onClick={()=>handleUnitClick(ap)} /> })}
                                         </div>
                                     </div>
                                 </div>
@@ -239,52 +210,11 @@
                         })}
                     </div>
 
-                    {/* --- MODAIS DO SISTEMA --- */}
-
-                    {/* 1. Modal de Vistoria (Edição) */}
                     {modalVistoriaOpen && <ModalVistoria item={itemEditando} faseAtual={fase} onClose={()=>setModalVistoriaOpen(false)} onSave={save} />}
                     
-                    {/* 2. Menu de Escolha de Relatório */}
-                    {menuRelatorioOpen && (
-                        <div className="modal-overlay" onClick={()=>setMenuRelatorioOpen(false)}>
-                            <div className="modal" onClick={e=>e.stopPropagation()}>
-                                <h3 style={{marginTop:0, color:'var(--secondary)', textAlign:'center'}}>Qual relatório deseja?</h3>
-                                
-                                <button className="menu-btn" onClick={()=>{setMenuRelatorioOpen(false); setModalProducaoOpen(true);}}>
-                                    <i className="ph-duotone ph-chart-line-up menu-icon" style={{color:'var(--primary)'}}></i>
-                                    <div>
-                                        <span style={{display:'block'}}>Produção</span>
-                                        <span style={{fontSize:'0.8rem', color:'#999', fontWeight:'400'}}>Mostra porcentagem e total concluído.</span>
-                                    </div>
-                                </button>
-
-                                <button className="menu-btn" onClick={()=>{setMenuRelatorioOpen(false); setModalMedicaoOpen(true);}}>
-                                    <i className="ph-duotone ph-users-three menu-icon" style={{color:'#3B82F6'}}></i>
-                                    <div>
-                                        <span style={{display:'block'}}>Medição</span>
-                                        <span style={{fontSize:'0.8rem', color:'#999', fontWeight:'400'}}>Lista os apartamentos por equipe.</span>
-                                    </div>
-                                </button>
-
-                                <button onClick={()=>setMenuRelatorioOpen(false)} style={{background:'transparent', border:'none', color:'#666', width:'100%', padding:15, cursor:'pointer'}}>Cancelar</button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* 3. Relatório de Produção (Avanço Físico - Porcentagem) */}
-                    {modalProducaoOpen && <ModalProducao 
-                        onClose={()=>setModalProducaoOpen(false)} 
+                    {reportOpen && <ModalRelatorio 
+                        onClose={()=>setReportOpen(false)} 
                         supabase={supabase} 
-                        torreAtual={torre} 
-                        faseAtual={fase}
-                        totalEscopo={totalScope}
-                    />}
-
-                    {/* 4. Relatório de Medição (Detalhado - Equipes) */}
-                    {modalMedicaoOpen && <ModalMedicao 
-                        onClose={()=>setModalMedicaoOpen(false)} 
-                        supabase={supabase} 
-                        torreAtual={torre} 
                         faseAtual={fase}
                     />}
                 </div>
@@ -301,77 +231,116 @@
             return <div className={cls} onClick={onClick}>{content}</div>;
         }
 
-        // --- COMPONENTES DE RELATÓRIO ---
+        // --- MODAL DE VISTORIA COMPLETO ---
+        function ModalVistoria({ item, faseAtual, onClose, onSave }) {
+            const [status, setStatus] = useState(item.status || "");
+            const [obs, setObs] = useState(item.obs || "");
+            const [equipe, setEquipe] = useState(item.equipe || ""); 
+            
+            // Novos Campos
+            const [funcionario, setFuncionario] = useState(item.funcionario || "");
+            const [dataInicio, setDataInicio] = useState(item.data_inicio || "");
+            const [dataFim, setDataFim] = useState(item.data_fim || "");
 
-        function ModalProducao({ onClose, supabase, torreAtual, faseAtual, totalEscopo }) {
-            const [dtInicio, setDtInicio] = useState('');
-            const [dtFim, setDtFim] = useState('');
-            const [loading, setLoading] = useState(false);
-            const [stats, setStats] = useState(null);
+            const listaEquipes = EQUIPES_POR_FASE[faseAtual] || [];
 
-            const gerar = async () => {
-                if(!dtInicio || !dtFim) return alert("Selecione as datas!");
-                setLoading(true);
-                const { count } = await supabase.from('vistorias').select('*', { count: 'exact' })
-                    .eq('torre', torreAtual).eq('fase', faseAtual).eq('status', 'ok')
-                    .gte('updated_at', dtInicio + 'T00:00:00').lte('updated_at', dtFim + 'T23:59:59');
-                
-                const produced = count || 0;
-                const percent = totalEscopo > 0 ? Math.round((produced / totalEscopo) * 100) : 0;
-                setStats({ produced, percent });
-                setLoading(false);
+            const handleSave = () => {
+                onSave({ status, obs, equipe, funcionario, dataInicio, dataFim });
             };
 
             return (
                 <div className="modal-overlay" onClick={onClose}>
                     <div className="modal" onClick={e=>e.stopPropagation()}>
-                        <h3 style={{marginTop:0, color:'var(--secondary)'}}>Produção: {torreAtual}</h3>
-                        <div style={{display:'flex', gap:10, marginBottom:15}}>
-                            <input type="date" value={dtInicio} onChange={e=>setDtInicio(e.target.value)} />
-                            <input type="date" value={dtFim} onChange={e=>setDtFim(e.target.value)} />
-                        </div>
-                        <button className="btn-save" onClick={gerar}>{loading ? 'Calculando...' : 'Ver Avanço'}</button>
-                        {stats && (
-                            <div style={{marginTop:20}}>
-                                <div className="prod-card">
-                                    <span className="prod-val">{stats.produced}</span>
-                                    <span className="prod-sub">UNIDADES FEITAS</span>
-                                </div>
-                                <div className="prod-card" style={{marginTop:10, borderColor:'var(--primary)', background:'#F0FDF4'}}>
-                                    <span className="prod-val">{stats.percent}%</span>
-                                    <span className="prod-sub">DE AVANÇO NESTE PERÍODO</span>
-                                </div>
-                                <p style={{textAlign:'center', fontSize:'0.8rem', color:'#999', marginTop:10}}>Base total: {totalEscopo} unidades.</p>
+                        <h3 style={{marginTop:0, color:'var(--secondary)'}}>{String(item.id).includes('HALL')?'Hall':'Apto '+item.id}</h3>
+                        
+                        <span className="label-section">1. DADOS DA EXECUÇÃO</span>
+                        <select value={equipe} onChange={e=>setEquipe(e.target.value)} style={{marginBottom:10}}>
+                            <option value="">-- Selecione a Equipe --</option>
+                            {listaEquipes.map(eq => <option key={eq} value={eq}>{eq}</option>)}
+                        </select>
+                        
+                        <input type="text" placeholder="Nome do Profissional" value={funcionario} onChange={e=>setFuncionario(e.target.value)} style={{marginBottom:10}} />
+
+                        <div style={{display:'flex', gap:10, marginBottom:10}}>
+                            <div style={{flex:1}}>
+                                <span className="label-section" style={{marginTop:0}}>INÍCIO</span>
+                                <input type="date" value={dataInicio} onChange={e=>setDataInicio(e.target.value)} />
                             </div>
+                            <div style={{flex:1}}>
+                                <span className="label-section" style={{marginTop:0}}>FIM</span>
+                                <input type="date" value={dataFim} onChange={e=>setDataFim(e.target.value)} />
+                            </div>
+                        </div>
+
+                        <span className="label-section">2. VISTORIA</span>
+                        <div className="btn-group">
+                            <div className={`btn-opt ${status==='ok'?'sel-ok':''}`} onClick={()=>setStatus('ok')}><i className="ph-bold ph-thumbs-up"></i> Aprovado</div>
+                            <div className={`btn-opt ${status==='pendente'?'sel-err':''}`} onClick={()=>setStatus('pendente')}><i className="ph-bold ph-warning-circle"></i> Pendente</div>
+                        </div>
+
+                        {status === 'pendente' && (
+                            <textarea style={{width:'100%', height:60, marginTop:10}} placeholder="Descreva a pendência..." value={obs} onChange={e=>setObs(e.target.value)}></textarea>
                         )}
-                        <button onClick={onClose} style={{background:'transparent', border:'none', color:'#666', width:'100%', padding:15, marginTop:10, cursor:'pointer'}}>Fechar</button>
+                        
+                        <button className="btn-save" onClick={handleSave}>SALVAR</button>
                     </div>
                 </div>
             )
         }
 
-        function ModalMedicao({ onClose, supabase, torreAtual, faseAtual }) {
+        // --- RELATÓRIO DE PRODUTIVIDADE ---
+        function ModalRelatorio({ onClose, supabase, faseAtual }) {
             const [dtInicio, setDtInicio] = useState('');
             const [dtFim, setDtFim] = useState('');
             const [loading, setLoading] = useState(false);
-            const [medicao, setMedicao] = useState(null);
+            const [relatorio, setRelatorio] = useState(null);
+
+            const isAzulejo = faseAtual.includes("AZULEJO");
 
             const gerar = async () => {
                 if(!dtInicio || !dtFim) return alert("Selecione as datas!");
                 setLoading(true);
-                const { data } = await supabase.from('vistorias').select('*')
-                    .eq('torre', torreAtual).eq('fase', faseAtual).eq('status', 'ok')
-                    .gte('updated_at', dtInicio + 'T00:00:00').lte('updated_at', dtFim + 'T23:59:59');
+                
+                // Busca tudo da fase atual no periodo (independente da torre)
+                const { data } = await supabase.from('vistorias')
+                    .select('*')
+                    .eq('fase', faseAtual)
+                    .eq('status', 'ok') // Considera apenas aprovados para produtividade
+                    .gte('data_fim', dtInicio) // Usa a data de FIM do serviço
+                    .lte('data_fim', dtFim);
 
                 if(data) {
-                    const porEquipe = {};
+                    const stats = {}; // Chave: "Equipe - Funcionario"
+
                     data.forEach(item => {
-                        const eq = item.equipe || "SEM EQUIPE";
-                        if(!porEquipe[eq]) porEquipe[eq] = [];
-                        porEquipe[eq].push(item.unidade);
+                        const chave = `${item.equipe || '?'} - ${item.funcionario || '?'}`;
+                        if(!stats[chave]) stats[chave] = { qtd: 0, m2: 0, dias: 0 };
+
+                        stats[chave].qtd++;
+                        
+                        // CÁLCULO M2 (AZULEJO)
+                        if(isAzulejo) {
+                            if(!String(item.unidade).includes("HALL")) {
+                                const final = parseInt(item.unidade.slice(-1));
+                                // Ponta (1,2,7,8) = 96m2 | Meio (3,4,5,6) = 76m2
+                                // NOTA: O user disse "Meio: 02 04 05 06", mas "Ponta 01 02 07 08". 
+                                // Vou assumir Ponta = 1,2,7,8 e Meio = 3,4,5,6 pela lógica padrão
+                                if([1,2,7,8].includes(final)) stats[chave].m2 += 96;
+                                else stats[chave].m2 += 76;
+                            }
+                        } 
+                        // CÁLCULO DIAS (OUTROS)
+                        else {
+                            if(item.data_inicio && item.data_fim) {
+                                const d1 = new Date(item.data_inicio);
+                                const d2 = new Date(item.data_fim);
+                                const diffTime = Math.abs(d2 - d1);
+                                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; 
+                                stats[chave].dias += diffDays;
+                            }
+                        }
                     });
-                    Object.keys(porEquipe).forEach(eq => porEquipe[eq].sort());
-                    setMedicao({ total: data.length, detalhes: porEquipe });
+                    setRelatorio(stats);
                 }
                 setLoading(false);
             };
@@ -379,64 +348,45 @@
             return (
                 <div className="modal-overlay" onClick={onClose}>
                     <div className="modal" onClick={e=>e.stopPropagation()}>
-                        <h3 style={{marginTop:0, color:'var(--secondary)'}}>Medição: {torreAtual}</h3>
+                        <h3 style={{marginTop:0, color:'var(--secondary)'}}>Produtividade: {isAzulejo ? 'M²' : 'Geral'}</h3>
+                        <p style={{fontSize:'0.8rem', color:'#666', marginBottom:10}}>Filtra pela data de TÉRMINO do serviço.</p>
+
                         <div style={{display:'flex', gap:10, marginBottom:15}}>
                             <input type="date" value={dtInicio} onChange={e=>setDtInicio(e.target.value)} />
                             <input type="date" value={dtFim} onChange={e=>setDtFim(e.target.value)} />
                         </div>
-                        <button className="btn-save" onClick={gerar}>{loading ? 'Calculando...' : 'Ver Medição'}</button>
-                        
-                        {medicao && (
-                            <div style={{marginTop:20, animation:'slideUp 0.3s'}}>
-                                <div style={{textAlign:'center', marginBottom:15}}>
-                                    <span style={{fontSize:'2rem', fontWeight:'800', color:'var(--primary)'}}>{medicao.total}</span>
-                                    <span style={{display:'block', fontSize:'0.75rem', fontWeight:'bold', color:'#666'}}>TOTAL PRODUZIDO</span>
-                                </div>
-                                {Object.keys(medicao.detalhes).length === 0 && <p style={{textAlign:'center', color:'#999'}}>Nada encontrado.</p>}
-                                {Object.keys(medicao.detalhes).map(eq => (
-                                    <div key={eq} className="team-card">
-                                        <div className="team-header"><span>{eq}</span><span className="team-count">{medicao.detalhes[eq].length} UN</span></div>
-                                        <div className="team-units">{medicao.detalhes[eq].join(', ')}</div>
-                                    </div>
-                                ))}
+                        <button className="btn-save" onClick={gerar}>{loading ? 'Calculando...' : 'Gerar'}</button>
+
+                        {relatorio && (
+                            <div style={{marginTop:20}}>
+                                <table className="report-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Profissional</th>
+                                            <th>Qtd</th>
+                                            <th style={{textAlign:'right'}}>{isAzulejo ? 'M² Total' : 'Média Dias'}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {Object.keys(relatorio).map(k => {
+                                            const r = relatorio[k];
+                                            let metric = "";
+                                            if(isAzulejo) metric = r.m2 + " m²";
+                                            else metric = (r.dias / r.qtd).toFixed(1) + " dias/ap";
+
+                                            return (
+                                                <tr key={k}>
+                                                    <td>{k}</td>
+                                                    <td>{r.qtd}</td>
+                                                    <td className="metric-highlight" style={{textAlign:'right'}}>{metric}</td>
+                                                </tr>
+                                            )
+                                        })}
+                                    </tbody>
+                                </table>
                             </div>
                         )}
                         <button onClick={onClose} style={{background:'transparent', border:'none', color:'#666', width:'100%', padding:15, marginTop:10, cursor:'pointer'}}>Fechar</button>
-                    </div>
-                </div>
-            )
-        }
-
-        function ModalVistoria({ item, faseAtual, onClose, onSave }) {
-            const [status, setStatus] = useState(item.status);
-            const [obs, setObs] = useState(item.obs || "");
-            const [equipe, setEquipe] = useState(item.equipe || ""); 
-            const listaEquipes = EQUIPES_POR_FASE[faseAtual] || [];
-
-            return (
-                <div className="modal-overlay" onClick={onClose}>
-                    <div className="modal" onClick={e=>e.stopPropagation()}>
-                        <h3 style={{marginTop:0, color:'var(--secondary)'}}>{String(item.id).includes('HALL')?'Hall':(item.id === 'COBERTURA' ? 'Cobertura' : 'Apto '+item.id)}</h3>
-                        
-                        <span className="label-section">1. EQUIPE</span>
-                        <select value={equipe} onChange={e=>setEquipe(e.target.value)} style={{marginBottom:15}}>
-                            <option value="">-- Selecione --</option>
-                            {listaEquipes.map(eq => <option key={eq} value={eq}>{eq}</option>)}
-                        </select>
-
-                        <span className="label-section">2. AVALIAÇÃO</span>
-                        <div className="btn-group">
-                            <div className={`btn-opt ${status==='ok'?'sel-ok':''}`} onClick={()=>setStatus('ok')}><i className="ph-bold ph-thumbs-up"></i> Aprovado</div>
-                            <div className={`btn-opt ${status==='pendente'?'sel-err':''}`} onClick={()=>setStatus('pendente')}><i className="ph-bold ph-warning-circle"></i> Pendente</div>
-                        </div>
-
-                        {status === 'pendente' && (
-                            <div style={{animation:'slideUp 0.2s'}}>
-                                <span className="label-section" style={{color:'var(--danger)'}}>O QUE ESTÁ ERRADO?</span>
-                                <textarea autoFocus placeholder="Descreva a falha..." value={obs} onChange={e=>setObs(e.target.value)}></textarea>
-                            </div>
-                        )}
-                        <button className="btn-save" onClick={()=>onSave(status, obs, equipe)}>SALVAR DADOS</button>
                     </div>
                 </div>
             )
